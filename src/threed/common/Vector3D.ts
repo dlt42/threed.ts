@@ -1,5 +1,7 @@
+import { Coords } from './common.types';
+
 export default class Vector3D {
-  public static crossProduct(vectorA: Vector3D, vectorB: Vector3D): Vector3D {
+  public static crossProduct(vectorA: Vector3D, vectorB: Vector3D) {
     return new Vector3D({
       type: 'coords',
       coords: [
@@ -20,7 +22,7 @@ export default class Vector3D {
     x: number;
     y: number;
     z: number;
-  }): number {
+  }) {
     return vectorA.x * x + vectorA.y * y + vectorA.z * z;
   }
 
@@ -30,7 +32,7 @@ export default class Vector3D {
   }: {
     vectorA: Vector3D;
     vectorB: Vector3D;
-  }): number {
+  }) {
     return (
       vectorA.x * vectorB.x + vectorA.y * vectorB.y + vectorA.z * vectorB.z
     );
@@ -40,7 +42,7 @@ export default class Vector3D {
     args:
       | { type: 'coords'; vectorA: Vector3D; x: number; y: number; z: number }
       | { type: 'vectors'; vectorA: Vector3D; vectorB: Vector3D }
-  ): number {
+  ) {
     if (args.type === 'coords') {
       return Vector3D.dotProductCoords(args);
     } else {
@@ -54,8 +56,8 @@ export default class Vector3D {
 
   public constructor(
     args:
-      | { type: 'points'; pointA: number[]; pointB: number[] }
-      | { type: 'coords'; coords: number[] }
+      | { type: 'points'; pointA: Coords; pointB: Coords }
+      | { type: 'coords'; coords: Coords }
   ) {
     switch (args.type) {
       case 'points': {
@@ -75,25 +77,19 @@ export default class Vector3D {
     }
   }
 
-  public getMagnitude(): number {
+  public getMagnitude() {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
 
   public normalise() {
-    const magnitudeD: number =
+    const magnitude: number =
       1 / Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-    this.x = this.x * magnitudeD;
-    this.y = this.y * magnitudeD;
-    this.z = this.z * magnitudeD;
+    this.x = this.x * magnitude;
+    this.y = this.y * magnitude;
+    this.z = this.z * magnitude;
   }
 
-  private setPoints({
-    pointA,
-    pointB,
-  }: {
-    pointA: number[];
-    pointB: number[];
-  }) {
+  private setPoints({ pointA, pointB }: { pointA: Coords; pointB: Coords }) {
     this.x = pointB[0] - pointA[0];
     this.y = pointB[1] - pointA[1];
     this.z = pointB[2] - pointA[2];
@@ -107,7 +103,7 @@ export default class Vector3D {
 
   public set(
     args:
-      | { type: 'points'; pointA: number[]; pointB: number[] }
+      | { type: 'points'; pointA: Coords; pointB: Coords }
       | {
           type: 'direct';
           x: number;

@@ -1,17 +1,17 @@
 import Color from '../common/Color';
+import { Coords } from '../common/common.types';
 import Matrix from '../common/Matrix';
-import Translation from '../common/Translation';
-import ModelInstanceListener from '../notification/ModelInstanceListener';
+import { ModelInstanceListener } from '../notification/Listeners';
 import PolygonInstance from './PolygonInstance';
 import VertexInstance from './VertexInstance';
 
 export default class ModelInstance {
   public polygonArray: PolygonInstance[];
   public vertexArray: VertexInstance[];
-  private viewCoordinates: number[][];
-  private worldCoordinates: number[][];
-  private worldPosition: number[];
-  public viewPosition: number[];
+  private viewCoords: Coords[];
+  private worldCoords: Coords[];
+  private worldPosition: Coords;
+  public viewPosition: Coords;
   public boundingRadius: number;
   private listeners: Array<ModelInstanceListener>;
   public intensityLocked: boolean;
@@ -20,7 +20,7 @@ export default class ModelInstance {
   public constructor(
     polygons: PolygonInstance[],
     vertices: VertexInstance[],
-    worldPosition: number[],
+    worldPosition: Coords,
     boundingRadius: number
   ) {
     this.intensityLocked = false;
@@ -32,58 +32,58 @@ export default class ModelInstance {
     this.viewPosition = [0, 0, 0];
     this.listeners = [];
     this.polygonArray.forEach((current) => current.calculateNormal());
-    this.viewCoordinates = [];
-    this.worldCoordinates = [];
-    for (let i: number = 0; i < this.vertexArray.length; i++) {
-      this.viewCoordinates[i] = this.vertexArray[i].viewCoordinates;
-      this.worldCoordinates[i] = this.vertexArray[i].worldCoordinates;
+    this.viewCoords = [];
+    this.worldCoords = [];
+    for (let i = 0; i < this.vertexArray.length; i++) {
+      this.viewCoords[i] = this.vertexArray[i].viewCoords;
+      this.worldCoords[i] = this.vertexArray[i].worldCoords;
     }
   }
 
-  public setEnabled(): void {
+  public setEnabled() {
     this.enabled = true;
   }
 
-  public setDisabled(): void {
+  public setDisabled() {
     this.enabled = false;
   }
 
-  public addListener(listener: ModelInstanceListener): void {
+  public addListener(listener: ModelInstanceListener) {
     this.listeners.push(listener);
   }
 
-  public calculateCulled(viewPosition: number[]) {
+  public calculateCulled(viewPosition: Coords) {
     for (let index = 0; index < this.polygonArray.length; index++) {
       const element = this.polygonArray[index];
       element.culled =
         element.surfaceNormal[0] *
-          (viewPosition[0] - element.vertexArray[0].worldCoordinates[0]) +
+          (viewPosition[0] - element.vertexArray[0].worldCoords[0]) +
           element.surfaceNormal[1] *
-            (viewPosition[1] - element.vertexArray[0].worldCoordinates[1]) +
+            (viewPosition[1] - element.vertexArray[0].worldCoords[1]) +
           element.surfaceNormal[2] *
-            (viewPosition[2] - element.vertexArray[0].worldCoordinates[2]) >
+            (viewPosition[2] - element.vertexArray[0].worldCoords[2]) >
         0;
     }
   }
 
   public centreOnOrigin() {
-    const initialCoordinates: number[] =
-      this.polygonArray[0].vertexArray[0].worldCoordinates;
-    let maxX: number = initialCoordinates[0];
-    let maxY: number = initialCoordinates[1];
-    let maxZ: number = initialCoordinates[2];
-    let minX: number = initialCoordinates[0];
-    let minY: number = initialCoordinates[1];
-    let minZ: number = initialCoordinates[2];
+    const initialCoords: Coords =
+      this.polygonArray[0].vertexArray[0].worldCoords;
+    let maxX = initialCoords[0];
+    let maxY = initialCoords[1];
+    let maxZ = initialCoords[2];
+    let minX = initialCoords[0];
+    let minY = initialCoords[1];
+    let minZ = initialCoords[2];
     for (let index = 0; index < this.polygonArray.length; index++) {
       const polygon = this.polygonArray[index];
       const vertexArray: VertexInstance[] = polygon.vertexArray;
-      for (let v: number = 0; v < 3; v++) {
+      for (let v = 0; v < 3; v++) {
         const vertex: VertexInstance = vertexArray[v];
-        const localCoordinates: number[] = vertex.worldCoordinates;
-        const x: number = localCoordinates[0];
-        const y: number = localCoordinates[1];
-        const z: number = localCoordinates[2];
+        const localCoords: Coords = vertex.worldCoords;
+        const x = localCoords[0];
+        const y = localCoords[1];
+        const z = localCoords[2];
         if (x < minX) minX = x;
         else if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -92,17 +92,19 @@ export default class ModelInstance {
         else if (z > maxZ) maxZ = z;
       }
     }
-    const centreX: number = (maxX - minX) / 2 + minX;
-    const centreY: number = (maxY - minY) / 2 + minY;
-    const centreZ: number = (maxZ - minZ) / 2 + minZ;
-    const translate: Matrix = Matrix.getTranslationMatrixForTranslation(
-      new Translation(-centreX, -centreY, -centreZ)
+    const centreX = (maxX - minX) / 2 + minX;
+    const centreY = (maxY - minY) / 2 + minY;
+    const centreZ = (maxZ - minZ) / 2 + minZ;
+    const translate: Matrix = Matrix.getTranslationMatrixForValues(
+      -centreX,
+      -centreY,
+      -centreZ
     );
     this.transformWorld(translate);
   }
 
-  public getWorldPosition(): number[] {
-    return this.worldPosition.slice(0);
+  public getWorldPosition() {
+    return this.worldPosition.slice(0) as Coords;
   }
 
   public modelChanged() {
@@ -141,7 +143,7 @@ export default class ModelInstance {
     });
   }
 
-  public setWorldPosition(pos: number[]) {
+  public setWorldPosition(pos: Coords) {
     this.transformWorld(
       Matrix.getTranslationMatrix([
         -(this.worldPosition[0] - pos[0]),
@@ -152,14 +154,14 @@ export default class ModelInstance {
   }
 
   public transformToView(matrix: Matrix) {
-    for (let i = 0; i < this.viewCoordinates.length; i++)
-      matrix.transform(this.worldCoordinates[i], this.viewCoordinates[i]);
+    for (let i = 0; i < this.viewCoords.length; i++)
+      matrix.transform(this.worldCoords[i], this.viewCoords[i]);
     matrix.transform(this.worldPosition, this.viewPosition);
   }
 
   public transformWorld(matrix: Matrix) {
-    for (let i = 0; i < this.worldCoordinates.length; i++)
-      matrix.transformCoords(this.worldCoordinates[i]);
+    for (let i = 0; i < this.worldCoords.length; i++)
+      matrix.transformCoords(this.worldCoords[i]);
     for (let i = 0; i < this.polygonArray.length; i++)
       this.polygonArray[i].calculateNormal();
     matrix.transformCoords(this.worldPosition);

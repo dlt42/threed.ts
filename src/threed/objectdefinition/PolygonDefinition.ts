@@ -11,11 +11,11 @@ export default class PolygonDefinition {
     this.color = color;
   }
 
-  public getColor(): Color {
+  public getColor() {
     return this.color;
   }
 
-  public getVertices(): VertexDefinition[] {
+  public getVertices() {
     return this.vertexArray;
   }
 }

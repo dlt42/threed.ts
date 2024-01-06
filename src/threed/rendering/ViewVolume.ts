@@ -1,21 +1,22 @@
-import ScreenAreaEvent from '../notification/ScreenAreaEvent';
-import ScreenAreaListener from '../notification/ScreenAreaListener';
+import { Coords } from '../common/common.types';
+import { ScreenAreaEvent } from '../notification/Event';
+import { ScreenAreaListener } from '../notification/Listeners';
 import ModelInstance from '../objectinstance/ModelInstance';
 import PolygonInstance from '../objectinstance/PolygonInstance';
 import VertexInstance from '../objectinstance/VertexInstance';
 import ClipPlane from './ClipPlane';
 
 export default class ViewVolume implements ScreenAreaListener {
-  public static readonly REJECT: number = 0;
-  public static readonly PARTIAL: number = 1;
-  public static readonly ACCEPT: number = 2;
-  private nearPlaneDepth: number = 100;
-  private viewPlaneDepth: number = 400;
-  private farPlaneDepth: number = 100000;
+  public static readonly REJECT = 0;
+  public static readonly PARTIAL = 1;
+  public static readonly ACCEPT = 2;
+  private nearPlaneDepth = 100;
+  private viewPlaneDepth = 400;
+  private farPlaneDepth = 100000;
   private clipPlanes: ClipPlane[];
-  private NearTimesFar: number = 0;
-  private FarMinusNear: number = 0;
-  private NTFOverFMN: number = 0;
+  private NearTimesFar = 0;
+  private FarMinusNear = 0;
+  private NTFOverFMN = 0;
 
   public constructor(nearPlaneDepth: number, farPlaneDepth: number) {
     this.clipPlanes = new Array<ClipPlane>(6);
@@ -24,7 +25,7 @@ export default class ViewVolume implements ScreenAreaListener {
     this.generateSideClipPlanes();
   }
 
-  private clipPolygon(polygon: PolygonInstance): PolygonInstance | null {
+  private clipPolygon(polygon: PolygonInstance) {
     const surfaceNormal = polygon.surfaceNormal;
     const tempVertices: VertexInstance[] = [];
     let newVertices = polygon.vertexArray.slice(0);
@@ -34,8 +35,8 @@ export default class ViewVolume implements ScreenAreaListener {
       for (let i = 0; i < newVertices.length; i++) {
         const vertexB = newVertices[(i + 1) % newVertices.length];
         const vertexA = newVertices[i];
-        const cA = vertexA.viewCoordinates;
-        const cB = vertexB.viewCoordinates;
+        const cA = vertexA.viewCoords;
+        const cB = vertexB.viewCoords;
         const cP = clipPlane.point;
         const dc1 =
           (cA[0] - cP[0]) * clipPlane.normal0 +
@@ -56,7 +57,7 @@ export default class ViewVolume implements ScreenAreaListener {
             ((cB[0] - cA[0]) * clipPlane.normal0 +
               (cB[1] - cA[1]) * clipPlane.normal1 +
               (cB[2] - cA[2]) * clipPlane.normal2);
-          const xC = [
+          const xC: Coords = [
             cA[0] + t * (cB[0] - cA[0]),
             cA[1] + t * (cB[1] - cA[1]),
             cA[2] + t * (cB[2] - cA[2]),
@@ -74,8 +75,8 @@ export default class ViewVolume implements ScreenAreaListener {
           tempVertices[count] = new VertexInstance({
             colourIndex: ci,
             normal: surfaceNormal,
-            modelCoordinates: mC,
-            viewCoordinates: xC,
+            modelCoords: mC,
+            viewCoords: xC,
             type: 'model',
             intensity: xI,
           });
@@ -94,7 +95,7 @@ export default class ViewVolume implements ScreenAreaListener {
       : null;
   }
 
-  private generateSideClipPlanes(): void {
+  private generateSideClipPlanes() {
     this.clipPlanes[0] = new ClipPlane(
       [0, 0, 0],
       [-this.nearPlaneDepth, -this.nearPlaneDepth, this.nearPlaneDepth],
@@ -117,7 +118,7 @@ export default class ViewVolume implements ScreenAreaListener {
     );
   }
 
-  public notify(event: ScreenAreaEvent): void {
+  public notify(event: ScreenAreaEvent) {
     if (event.getId() === ScreenAreaEvent.RESIZED) {
       const width = event.getWidth();
       const height = event.getHeight();
@@ -125,7 +126,7 @@ export default class ViewVolume implements ScreenAreaListener {
     }
   }
 
-  public objectTrivialReject(model: ModelInstance): number {
+  public objectTrivialReject(model: ModelInstance) {
     const radius = model.boundingRadius;
     const position = model.viewPosition;
     const x = position[0] <= 0.0 ? 0.0 - position[0] : position[0];
@@ -149,11 +150,11 @@ export default class ViewVolume implements ScreenAreaListener {
     return ViewVolume.PARTIAL;
   }
 
-  public rejectAndClip(polygon: PolygonInstance): PolygonInstance | null {
+  public rejectAndClip(polygon: PolygonInstance) {
     const count: number[] = [0, 0, 0, 0, 0, 0];
     const sizeRC = polygon.vertexArray.length;
     for (let n = 0; n < sizeRC; n++) {
-      const Vc = polygon.vertexArray[n].viewCoordinates;
+      const Vc = polygon.vertexArray[n].viewCoords;
       const Vz = Vc[2];
       if (Vz < 0) {
         if (this.nearPlaneDepth > -Vz) count[0]++;
@@ -178,7 +179,7 @@ export default class ViewVolume implements ScreenAreaListener {
     return tempPolygon;
   }
 
-  public setFarPlaneDepth(farPlaneDepth: number): void {
+  public setFarPlaneDepth(farPlaneDepth: number) {
     this.farPlaneDepth = farPlaneDepth;
     this.clipPlanes[5] = new ClipPlane(
       [this.nearPlaneDepth, this.nearPlaneDepth, farPlaneDepth],
@@ -191,7 +192,7 @@ export default class ViewVolume implements ScreenAreaListener {
     this.NTFOverFMN = this.NearTimesFar / this.FarMinusNear;
   }
 
-  public setNearPlaneDepth(nearPlaneDepth: number): void {
+  public setNearPlaneDepth(nearPlaneDepth: number) {
     this.nearPlaneDepth = nearPlaneDepth;
     this.clipPlanes[4] = new ClipPlane(
       [nearPlaneDepth, nearPlaneDepth, nearPlaneDepth],
@@ -204,19 +205,15 @@ export default class ViewVolume implements ScreenAreaListener {
     this.NTFOverFMN = this.NearTimesFar / this.FarMinusNear;
   }
 
-  public transferToScreenSpace(polygon: PolygonInstance): void {
+  public transferToScreenSpace(polygon: PolygonInstance) {
     for (let i = 0; i < polygon.vertexArray.length; i++) {
       const vi = polygon.vertexArray[i];
-      let tz = 1.0 / vi.viewCoordinates[2];
+      let tz = 1.0 / vi.viewCoords[2];
       if (tz === 0) tz = 1.0 / 0.01;
 
-      vi.screenCoordinates[0] =
-        this.viewPlaneDepth * (vi.viewCoordinates[0] * tz);
-      vi.screenCoordinates[1] = -(
-        this.viewPlaneDepth *
-        (vi.viewCoordinates[1] * tz)
-      );
-      vi.screenCoordinates[2] =
+      vi.screenCoords[0] = this.viewPlaneDepth * (vi.viewCoords[0] * tz);
+      vi.screenCoords[1] = -(this.viewPlaneDepth * (vi.viewCoords[1] * tz));
+      vi.screenCoords[2] =
         (this.farPlaneDepth / tz / this.FarMinusNear - this.NTFOverFMN) * tz;
     }
   }

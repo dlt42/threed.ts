@@ -1,6 +1,5 @@
-import Rotation from './Rotation';
-import Scale from './Scale';
-import Translation from './Translation';
+import { Coords, MatrixRow, MatrixValues } from './common.types';
+import { Rotation, Scale, Translation } from './Transformation';
 import TrigTables from './TrigTables';
 
 export default class Matrix {
@@ -9,7 +8,7 @@ export default class Matrix {
   private static rotationY: Matrix[] = Matrix.calcRotationYMatrices();
   private static rotationZ: Matrix[] = Matrix.calcRotationZMatrices();
 
-  private static calcRotationXMatrices(): Matrix[] {
+  private static calcRotationXMatrices() {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
@@ -23,7 +22,7 @@ export default class Matrix {
     return rotationArray;
   }
 
-  private static calcRotationYMatrices(): Matrix[] {
+  private static calcRotationYMatrices() {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
@@ -37,7 +36,7 @@ export default class Matrix {
     return rotationArray;
   }
 
-  private static calcRotationZMatrices(): Matrix[] {
+  private static calcRotationZMatrices() {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
@@ -52,10 +51,10 @@ export default class Matrix {
     return rotationArray;
   }
 
-  public static getRotationMatrix(rotation: Rotation): Matrix {
-    const angleX = rotation.x;
-    const angleY = rotation.y;
-    const angleZ = rotation.z;
+  public static getRotationMatrix({ transformation }: Rotation) {
+    const angleX = transformation.x;
+    const angleY = transformation.y;
+    const angleZ = transformation.z;
     let rotationMatrix: Matrix | null = null;
     if (Matrix.orderSwitch) {
       if (angleY != 0) rotationMatrix = Matrix.rotationY[angleY * 10.0];
@@ -87,19 +86,19 @@ export default class Matrix {
     return rotationMatrix;
   }
 
-  public static getScaleMatrix(scale: Scale): Matrix {
+  public static getScaleMatrix({ transformation }: Scale) {
     const scaleMatrix: Matrix = new Matrix();
-    const values: number[][] = scaleMatrix.values;
-    values[0][0] = scale.x;
-    values[1][1] = scale.y;
-    values[2][2] = scale.z;
+    const values = scaleMatrix.values;
+    values[0][0] = transformation.x;
+    values[1][1] = transformation.y;
+    values[2][2] = transformation.z;
     scaleMatrix.values = values;
     return scaleMatrix;
   }
 
-  public static getTranslationMatrix(coordinates: number[]): Matrix {
+  public static getTranslationMatrix(coordinates: Coords) {
     const translationMatrix: Matrix = new Matrix();
-    const values: number[][] = translationMatrix.values;
+    const values = translationMatrix.values;
     values[3][0] = coordinates[0];
     values[3][1] = coordinates[1];
     values[3][2] = coordinates[2];
@@ -107,13 +106,9 @@ export default class Matrix {
     return translationMatrix;
   }
 
-  public static getTranslationMatrixForValues(
-    x: number,
-    y: number,
-    z: number
-  ): Matrix {
+  public static getTranslationMatrixForValues(x: number, y: number, z: number) {
     const translationMatrix: Matrix = new Matrix();
-    const values: number[][] = translationMatrix.values;
+    const values = translationMatrix.values;
     values[3][0] = x;
     values[3][1] = y;
     values[3][2] = z;
@@ -121,10 +116,7 @@ export default class Matrix {
     return translationMatrix;
   }
 
-  public static getRotateModelAroundPoint(
-    point: number[],
-    rotation: Rotation
-  ): Matrix {
+  public static getRotateModelAroundPoint(point: Coords, rotation: Rotation) {
     const translateToOrigin: Matrix = Matrix.getTranslationMatrixForValues(
       -point[0],
       -point[1],
@@ -139,19 +131,19 @@ export default class Matrix {
     return Matrix.multiplyMatrices(transformMatrix, translateToPosition);
   }
 
-  public static getTranslationMatrixForTranslation(
-    translation: Translation
-  ): Matrix {
+  public static getTranslationMatrixForTranslation({
+    transformation,
+  }: Translation) {
     const translationMatrix: Matrix = new Matrix();
-    const values: number[][] = translationMatrix.values;
-    values[3][0] = translation.x;
-    values[3][1] = translation.y;
-    values[3][2] = translation.z;
+    const values = translationMatrix.values;
+    values[3][0] = transformation.x;
+    values[3][1] = transformation.y;
+    values[3][2] = transformation.z;
     translationMatrix.values = values;
     return translationMatrix;
   }
 
-  public static multiplyMatrices(matA: Matrix, matB: Matrix): Matrix {
+  public static multiplyMatrices(matA: Matrix, matB: Matrix) {
     const matrixNew = new Matrix();
     const valuesNew2 = matrixNew.values;
     for (let ii = 0; ii < 4; ii++) {
@@ -167,7 +159,7 @@ export default class Matrix {
     return matrixNew;
   }
 
-  public static multiplyValues(values: number[][], mat: Matrix): Matrix {
+  public static multiplyValues(values: MatrixValues, mat: Matrix) {
     const matrixNew: Matrix = new Matrix();
     const valuesNew = matrixNew.values;
     for (let i = 0; i < 4; i++) {
@@ -183,20 +175,19 @@ export default class Matrix {
     return matrixNew;
   }
 
-  public values: number[][];
+  public values: MatrixValues;
 
   public constructor() {
-    this.values = [];
-    for (let a = 0; a < 4; a++) {
-      this.values[a] = [];
-      for (let b = 0; b < 4; b++) {
-        this.values[a][b] = a === b ? 1 : 0;
-      }
-    }
+    this.values = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ];
   }
 
-  public transform(srcCoords: number[], destCoords: number[]): void {
-    const valuesOriginal: number[] = [
+  public transform(srcCoords: Coords, destCoords: Coords) {
+    const valuesOriginal: MatrixRow = [
       srcCoords[0],
       srcCoords[1],
       srcCoords[2],
@@ -215,8 +206,8 @@ export default class Matrix {
     destCoords[2] = valuesNew[2];
   }
 
-  public transformCoords(coords: number[]): void {
-    const valuesNew = [];
+  public transformCoords(coords: Coords) {
+    const valuesNew: MatrixRow = [0, 0, 0, 0];
     for (let i = 0; i < 4; i++) {
       valuesNew[i] =
         coords[0] * this.values[0][i] +

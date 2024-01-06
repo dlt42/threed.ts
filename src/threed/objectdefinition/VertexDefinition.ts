@@ -1,7 +1,8 @@
+import { Coords } from '../common/common.types';
 import Matrix from '../common/Matrix';
 
 export default class VertexDefinition {
-  public coordinates: number[];
+  public coordinates: Coords;
   public flag: boolean;
   public colourIndex: number;
 
@@ -13,9 +14,9 @@ export default class VertexDefinition {
     maxX: number,
     minZ: number,
     maxZ: number
-  ): VertexDefinition {
-    let x: number = this.coordinates[0] + xAdj;
-    let z: number = this.coordinates[2] + zAdj;
+  ) {
+    let x = this.coordinates[0] + xAdj;
+    let z = this.coordinates[2] + zAdj;
     if (x < minX) {
       x = minX;
     }
@@ -31,17 +32,17 @@ export default class VertexDefinition {
     return new VertexDefinition([x, y, z]);
   }
 
-  public constructor(coordinates: number[]) {
+  public constructor(coordinates: Coords) {
     this.flag = false;
     this.colourIndex = 0;
     this.coordinates = coordinates;
   }
 
-  public copyDirect(): VertexDefinition {
-    return new VertexDefinition(this.coordinates.slice(0));
+  public copyDirect() {
+    return new VertexDefinition(this.coordinates.slice(0) as Coords);
   }
 
-  public getCoordinates(): number[] {
+  public getCoords() {
     return this.coordinates;
   }
 

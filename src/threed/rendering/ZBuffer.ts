@@ -6,11 +6,11 @@ export default class ZBuffer {
     this.clearBuffer();
   }
 
-  public clearBuffer(): void {
+  public clearBuffer() {
     this.zvalues.fill(1.0);
   }
 
-  public setDimensions(width: number, height: number): void {
+  public setDimensions(width: number, height: number) {
     this.zvalues = new Array<number>((width + 1) * (height + 1));
     this.clearBuffer();
   }

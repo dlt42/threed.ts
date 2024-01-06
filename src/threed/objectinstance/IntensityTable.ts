@@ -1,3 +1,5 @@
+import { IntensityDetails } from './instance.types';
+
 export default class IntensityTable extends Map<number[], number[]> {
   public surfaceNormals: number[][];
   public intensities: number[][];
@@ -32,16 +34,16 @@ export default class IntensityTable extends Map<number[], number[]> {
     this.full = false;
   }
 
-  public calculateIntensityGouraud(
-    x: number,
-    y: number,
-    z: number,
-    ambientLevel: number
-  ) {
+  public calculateIntensityGouraud({
+    x,
+    y,
+    z,
+    ambientLevel,
+  }: IntensityDetails) {
     if (!this.full) {
       let intensity = 0;
       let normal: number[];
-      const l: number = this.surfaceNormals.length;
+      const l = this.surfaceNormals.length;
       for (let i = 0; i < l; i++) {
         normal = this.surfaceNormals[i];
         intensity += normal[0] * x + normal[1] * y + normal[2] * z;
@@ -53,15 +55,10 @@ export default class IntensityTable extends Map<number[], number[]> {
     }
   }
 
-  public calculateIntensityFlat(
-    x: number,
-    y: number,
-    z: number,
-    ambientLevel: number
-  ) {
+  public calculateIntensityFlat({ x, y, z, ambientLevel }: IntensityDetails) {
     if (!this.full) {
       let normal: number[];
-      const l: number = this.surfaceNormals.length;
+      const l = this.surfaceNormals.length;
       for (let i = 0; i < l; i++) {
         normal = this.surfaceNormals[i];
         this.intensities[i][0] =
@@ -73,17 +70,12 @@ export default class IntensityTable extends Map<number[], number[]> {
     }
   }
 
-  public calculateIntensityNormal(
-    x: number,
-    y: number,
-    z: number,
-    ambientLevel: number
-  ) {
+  public calculateIntensityNormal({ x, y, z, ambientLevel }: IntensityDetails) {
     if (!this.full) {
       let intensity = 0;
       const n: number[] = [0, 0, 0];
       let normal: number[];
-      const l: number = this.surfaceNormals.length;
+      const l = this.surfaceNormals.length;
       for (let i = 0; i < l; i++) {
         normal = this.surfaceNormals[i];
         n[0] += normal[0];

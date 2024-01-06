@@ -1,4 +1,5 @@
 import Color from '../common/Color';
+import { RGBA } from '../common/common.types';
 import ColourConverter from './ColourConverter';
 
 export default class DefaultColourConverter extends ColourConverter {
@@ -12,9 +13,9 @@ export default class DefaultColourConverter extends ColourConverter {
     number[]
   >();
 
-  static colDiv: number = 1.0 / 255.0;
+  static colDiv = 1.0 / 255.0;
 
-  public getColour(intensity: number, color?: Color): Color {
+  public getColour(intensity: number, color?: Color) {
     if (color !== undefined) {
       let hsb: number[];
       if (DefaultColourConverter.hsbs.has(color)) {
@@ -36,7 +37,7 @@ export default class DefaultColourConverter extends ColourConverter {
       let hsb: number[] = [0, 0, 0];
       hsb = RGBtoHSV(color.rgba[0], color.rgba[1], color.rgba[2]);
       this.colors = [];
-      for (let i: number = 1; i < 255; i++)
+      for (let i = 1; i < 255; i++)
         this.colors[i - 1] = new Color(
           HSVtoRGB(hsb[0], hsb[1], DefaultColourConverter.colDiv * i * hsb[2])
         );
@@ -45,19 +46,19 @@ export default class DefaultColourConverter extends ColourConverter {
     }
   }
 
-  public processColorIndex(_: number, index: number): number {
+  public processColorIndex(_: number, index: number) {
     return index;
   }
 
-  public isRangeLimit(): boolean {
+  public isRangeLimit() {
     return false;
   }
 }
 
-function HSVtoRGB(h: number, s: number, v: number): number[] {
-  let r: number = 0;
-  let g: number = 0;
-  let b: number = 0;
+function HSVtoRGB(h: number, s: number, v: number) {
+  let r = 0;
+  let g = 0;
+  let b = 0;
   const i = Math.floor(h * 6);
   const f = h * 6 - i;
   const p = v * (1 - s);
@@ -83,10 +84,16 @@ function HSVtoRGB(h: number, s: number, v: number): number[] {
       (r = v), (g = p), (b = q);
       break;
   }
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), 255];
+  const result: RGBA = [
+    Math.round(r * 255),
+    Math.round(g * 255),
+    Math.round(b * 255),
+    255,
+  ];
+  return result;
 }
 
-function RGBtoHSV(r: number, g: number, b: number): number[] {
+function RGBtoHSV(r: number, g: number, b: number) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const d = max - min;

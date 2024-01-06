@@ -14,7 +14,7 @@ export default class WireFrameRenderer extends Renderer {
       if (ys > 0 && ys < this.fullHeight) {
         const line = (ys - 1) * this.fullWidth;
         if (xe < xs) {
-          const tx: number = xs;
+          const tx = xs;
           xs = xe;
           xe = tx;
         }
@@ -25,8 +25,8 @@ export default class WireFrameRenderer extends Renderer {
       }
     } else {
       if (ye < ys) {
-        const tx: number = xs;
-        const ty: number = ys;
+        const tx = xs;
+        const ty = ys;
         xs = xe;
         ys = ye;
         xe = tx;
@@ -54,15 +54,15 @@ export default class WireFrameRenderer extends Renderer {
 
   public renderPolygon(polygon: PolygonInstance) {
     if (polygon != null) {
-      for (let i: number = 0; i < polygon.vertexArray.length; i++) {
+      for (let i = 0; i < polygon.vertexArray.length; i++) {
         this.drawLine(
-          polygon.vertexArray[i].screenCoordinates[0] + this.fullWidth / 2,
-          polygon.vertexArray[i].screenCoordinates[1] + this.fullHeight / 2,
+          polygon.vertexArray[i].screenCoords[0] + this.fullWidth / 2,
+          polygon.vertexArray[i].screenCoords[1] + this.fullHeight / 2,
           polygon.vertexArray[(i + 1) % polygon.vertexArray.length]
-            .screenCoordinates[0] +
+            .screenCoords[0] +
             this.fullWidth / 2,
           polygon.vertexArray[(i + 1) % polygon.vertexArray.length]
-            .screenCoordinates[1] +
+            .screenCoords[1] +
             this.fullHeight / 2
         );
       }

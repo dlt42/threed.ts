@@ -1,5 +1,5 @@
-import ScreenAreaEvent from '../../notification/ScreenAreaEvent';
-import ScreenAreaListener from '../../notification/ScreenAreaListener';
+import { ScreenAreaEvent } from '../../notification/Event';
+import { ScreenAreaListener } from '../../notification/Listeners';
 import ModelInstance from '../../objectinstance/ModelInstance';
 import PolygonInstance from '../../objectinstance/PolygonInstance';
 import World from '../../world/World';
@@ -13,13 +13,13 @@ export default abstract class Renderer implements ScreenAreaListener {
   protected dataBuffer: ImageData | null = null;
   protected converter: ColourConverter;
   protected screenArea: ScreenArea;
-  protected fullWidth: number = 0;
-  protected halfWidth: number = 0;
-  protected fullHeight: number = 0;
-  protected halfHeight: number = 0;
+  protected fullWidth = 0;
+  protected halfWidth = 0;
+  protected fullHeight = 0;
+  protected halfHeight = 0;
   protected world: World | null = null;
   protected viewVolume: ViewVolume | null = null;
-  protected count: number = 0;
+  protected count = 0;
 
   public constructor(screenArea: ScreenArea, converter: ColourConverter) {
     this.screenArea = screenArea;
@@ -27,15 +27,15 @@ export default abstract class Renderer implements ScreenAreaListener {
     this.converter = converter;
   }
 
-  protected getScreenHeight(): number {
+  protected getScreenHeight() {
     return this.fullHeight;
   }
 
-  protected getScreenWidth(): number {
+  protected getScreenWidth() {
     return this.fullWidth;
   }
 
-  public notify(event: ScreenAreaEvent): void {
+  public notify(event: ScreenAreaEvent) {
     if (event.getId() === ScreenAreaEvent.RESIZED) {
       this.fullWidth = event.getWidth();
       this.fullHeight = event.getHeight();
@@ -47,21 +47,21 @@ export default abstract class Renderer implements ScreenAreaListener {
       this.zBuffer.clearBuffer();
   }
 
-  private defineZBuffer(): void {
-    let tWidth: number = this.fullWidth;
-    let tHeight: number = this.fullHeight;
+  private defineZBuffer() {
+    let tWidth = this.fullWidth;
+    let tHeight = this.fullHeight;
     if (tWidth < 1) tWidth = 1;
     if (tHeight < 1) tHeight = 1;
     if (this.zBuffer === null) this.zBuffer = new ZBuffer(tWidth, tHeight);
     else this.zBuffer.setDimensions(tWidth, tHeight);
   }
 
-  public setObjects(world: World | null, viewVolume: ViewVolume | null): void {
+  public setObjects(world: World | null, viewVolume: ViewVolume | null) {
     this.world = world;
     this.viewVolume = viewVolume;
   }
 
-  public async render(...args: unknown[]): Promise<void> {
+  public async render(...args: unknown[]) {
     switch (args.length) {
       case 0: {
         this.count = 1;
@@ -123,24 +123,24 @@ export default abstract class Renderer implements ScreenAreaListener {
     }
   }
 
-  private startVal: number = 0;
+  private startVal = 0;
 
-  protected start(): void {
+  protected start() {
     this.startVal = new Date().getTime();
   }
 
-  protected stop(): void {
-    const duration: number = new Date().getTime() - this.startVal;
+  protected stop() {
+    const duration = new Date().getTime() - this.startVal;
     console.log(duration + ' milliseconds (' + duration / 1000 + ')');
   }
 
   protected abstract renderPolygon(polygon: PolygonInstance): void;
 
-  public setColourConverter(colourConverter: ColourConverter): void {
+  public setColourConverter(colourConverter: ColourConverter) {
     this.converter = colourConverter;
   }
 
-  public setScreenArea(screenArea: ScreenArea): void {
+  public setScreenArea(screenArea: ScreenArea) {
     if (screenArea !== null) screenArea.removeListener(this);
     this.screenArea = screenArea;
     this.screenArea.addListener(this);

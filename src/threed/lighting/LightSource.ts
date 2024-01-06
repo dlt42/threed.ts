@@ -1,16 +1,13 @@
-import LightSourceEvent from '../notification/LightSourceEvent';
-import LightSourceListener from '../notification/LightSourceListener';
+import { Coords } from '../common/common.types';
+import { LightSourceEvent } from '../notification/Event';
+import { LightSourceListener } from '../notification/Listeners';
 
 export default class LightSource {
-  public positionX: number;
-  public positionY: number;
-  public positionZ: number;
+  public position: Coords;
   private listeners: LightSourceListener[];
 
-  public constructor(position: number[]) {
-    this.positionX = position[0];
-    this.positionY = position[1];
-    this.positionZ = position[2];
+  public constructor(position: Coords) {
+    this.position = position.slice(0) as Coords;
     this.listeners = [];
   }
 
@@ -18,25 +15,18 @@ export default class LightSource {
     this.listeners.push(listener);
   }
 
-  public getPosition(): number[] {
-    return [this.positionX, this.positionY, this.positionZ];
+  public getPosition() {
+    return this.position.slice(0) as Coords;
   }
 
   public removeListener(listener: LightSourceListener) {
     const index = this.listeners.indexOf(listener);
-    if (index >= 0) {
-      this.listeners.splice(index, 1);
-      return true;
-    }
-    return false;
+    if (index >= 0) this.listeners.splice(index, 1);
   }
 
-  public setPosition(position: number[]) {
-    this.positionX = position[0];
-    this.positionY = position[1];
-    this.positionZ = position[2];
-    const event: LightSourceEvent = new LightSourceEvent(this);
-    for (let i: number = 0; i < this.listeners.length; i++)
-      this.listeners[i].notify(event);
+  public setPosition(position: Coords) {
+    this.position = position.slice(0) as Coords;
+    const event = new LightSourceEvent(this);
+    this.listeners.forEach((current) => current.notify(event));
   }
 }

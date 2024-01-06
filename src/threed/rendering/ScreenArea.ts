@@ -1,5 +1,5 @@
-import ScreenAreaEvent from '../notification/ScreenAreaEvent';
-import ScreenAreaListener from '../notification/ScreenAreaListener';
+import { ScreenAreaEvent } from '../notification/Event';
+import { ScreenAreaListener } from '../notification/Listeners';
 
 export default class ScreenArea {
   private canvas: HTMLCanvasElement;
@@ -19,7 +19,7 @@ export default class ScreenArea {
     return this.canvas;
   }
 
-  public addListener(listener: ScreenAreaListener): void {
+  public addListener(listener: ScreenAreaListener) {
     this.listeners.push(listener);
     listener.notify(
       new ScreenAreaEvent(
@@ -31,7 +31,7 @@ export default class ScreenArea {
     );
   }
 
-  private clearBuffer(): void {
+  private clearBuffer() {
     if (this.buffer === null) {
       if (this.width > 0 && this.height > 0) {
         const arrayBuffer = new ArrayBuffer(this.width * this.height * 4);
@@ -55,7 +55,7 @@ export default class ScreenArea {
     }
   }
 
-  public async getDataBuffer(): Promise<ImageData> {
+  public async getDataBuffer() {
     while (this.buffer === null) {
       try {
         await new Promise((r) => setTimeout(r, 1));
@@ -66,11 +66,10 @@ export default class ScreenArea {
     return this.buffer;
   }
 
-  public refreshBuffer(): void {
+  public refreshBuffer() {
     if (this.buffer !== null) {
       const ctx = this.canvas.getContext('2d');
       if (ctx) ctx.putImageData(this.buffer, 0, 0);
-
       if (this.saveBuffer === null) {
         this.saveBuffer = new ImageData(this.width, this.height, {
           colorSpace: 'srgb',
@@ -81,12 +80,12 @@ export default class ScreenArea {
     this.clearBuffer();
   }
 
-  public removeListener(listener: ScreenAreaListener): void {
+  public removeListener(listener: ScreenAreaListener) {
     const index = this.listeners.indexOf(listener);
     if (index >= 0) this.listeners.splice(index, 1);
   }
 
-  public resized(): void {
+  public resized() {
     this.buffer = null;
     this.clearBuffer();
     this.listeners.forEach((current) =>
@@ -101,14 +100,13 @@ export default class ScreenArea {
     );
   }
 
-  public async getBuffer(): Promise<ImageData | null> {
+  public async getBuffer() {
     this.saveBuffer = null;
     let buf: ImageData | null = null;
     while (buf === null) {
       if (this.saveBuffer !== null) buf = this.saveBuffer;
       await new Promise((r) => setTimeout(r, 10));
     }
-
     return buf;
   }
 }

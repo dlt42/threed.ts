@@ -1,3 +1,4 @@
+import { Coords } from '../common/common.types';
 import Vector3D from '../common/Vector3D';
 import ModelDefinition from '../objectdefinition/ModelDefinition';
 import PolygonDefinition from '../objectdefinition/PolygonDefinition';
@@ -7,27 +8,27 @@ import PolygonInstance from './PolygonInstance';
 import VertexInstance from './VertexInstance';
 
 export default class ModelInstanceGenerator {
-  public generateInstance(model: ModelDefinition): ModelInstance {
-    let radius: number = 0;
+  public generateInstance(model: ModelDefinition) {
+    let radius = 0;
     const polygonDefinitionArray: PolygonDefinition[] = model.getPolygons();
     const polygonInstanceArray: PolygonInstance[] = new Array<PolygonInstance>(
       polygonDefinitionArray.length
     );
     const vertexInstanceHashtable: Map<VertexDefinition, VertexInstance> =
       new Map<VertexDefinition, VertexInstance>();
-    const position: number[] = [0, 0, 0];
-    for (let p: number = 0; p < polygonDefinitionArray.length; p++) {
+    const position: Coords = [0, 0, 0];
+    for (let p = 0; p < polygonDefinitionArray.length; p++) {
       const polygon: PolygonDefinition = polygonDefinitionArray[p];
       const vertexArray: VertexDefinition[] = polygon.getVertices();
       const worldVertexArray: VertexInstance[] = new Array<VertexInstance>(3);
-      for (let v: number = 0; v < 3; v++) {
+      for (let v = 0; v < 3; v++) {
         const vertex: VertexDefinition = vertexArray[v];
         const originToPoint: Vector3D = new Vector3D({
           type: 'points',
           pointA: position,
-          pointB: vertex.getCoordinates(),
+          pointB: vertex.getCoords(),
         });
-        const magnitude: number = originToPoint.getMagnitude();
+        const magnitude = originToPoint.getMagnitude();
         if (magnitude > radius) {
           radius = magnitude;
         }
@@ -35,7 +36,7 @@ export default class ModelInstanceGenerator {
         if (!instance) {
           instance = new VertexInstance({
             type: 'world',
-            worldCoordinates: Array.from(vertex.getCoordinates()),
+            worldCoords: vertex.getCoords().slice(0) as Coords,
             colourIndex: vertex.colourIndex,
           });
           vertexInstanceHashtable.set(vertex, instance);

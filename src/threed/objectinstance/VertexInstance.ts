@@ -1,10 +1,11 @@
+import { Coords } from '../common/common.types';
 import IntensityTable from './IntensityTable';
 
 export default class VertexInstance extends IntensityTable {
-  public worldCoordinates: number[];
-  public viewCoordinates: number[] = [0, 0, 0];
-  public screenCoordinates: number[] = [0, 0, 0];
-  public modelCoordinates: number[];
+  public worldCoords: Coords;
+  public viewCoords: Coords = [0, 0, 0];
+  public screenCoords: Coords = [0, 0, 0];
+  public modelCoords: Coords;
   public colourIndex: number;
 
   public constructor(
@@ -12,37 +13,32 @@ export default class VertexInstance extends IntensityTable {
       | {
           type: 'world';
           colourIndex: number;
-          worldCoordinates: number[];
+          worldCoords: Coords;
         }
       | {
           type: 'model';
           colourIndex: number;
-          viewCoordinates: number[];
+          viewCoords: Coords;
           normal: number[];
           intensity: number;
-          modelCoordinates: number[];
+          modelCoords: Coords;
         }
   ) {
     super();
     if (params.type === 'world') {
-      const { colourIndex, worldCoordinates } = params;
-      this.modelCoordinates = Array.from(worldCoordinates);
-      this.worldCoordinates = worldCoordinates;
-      this.viewCoordinates = [0, 0, 0];
-      this.screenCoordinates = [0, 0, 0];
+      const { colourIndex, worldCoords } = params;
+      this.modelCoords = worldCoords.slice(0) as Coords;
+      this.worldCoords = worldCoords;
+      this.viewCoords = [0, 0, 0];
+      this.screenCoords = [0, 0, 0];
       this.colourIndex = colourIndex;
     } else {
-      const {
-        colourIndex,
-        intensity,
-        modelCoordinates,
-        normal,
-        viewCoordinates,
-      } = params;
-      this.modelCoordinates = modelCoordinates;
-      this.worldCoordinates = [0, 0, 0];
-      this.viewCoordinates = viewCoordinates;
-      this.screenCoordinates = [0, 0, 0];
+      const { colourIndex, intensity, modelCoords, normal, viewCoords } =
+        params;
+      this.modelCoords = modelCoords;
+      this.worldCoords = [0, 0, 0];
+      this.viewCoords = viewCoords;
+      this.screenCoords = [0, 0, 0];
       this.colourIndex = colourIndex;
       this.setIntensity(normal, intensity);
     }
@@ -52,25 +48,24 @@ export default class VertexInstance extends IntensityTable {
     vertexA: VertexInstance,
     vertexB: VertexInstance,
     t: number
-  ): number[] {
-    return [
-      vertexA.modelCoordinates[0] +
-        t * (vertexB.modelCoordinates[0] - vertexA.modelCoordinates[0]),
-      vertexA.modelCoordinates[1] +
-        t * (vertexB.modelCoordinates[1] - vertexA.modelCoordinates[1]),
-      vertexA.modelCoordinates[2] +
-        t * (vertexB.modelCoordinates[2] - vertexA.modelCoordinates[2]),
+  ) {
+    const result: Coords = [
+      vertexA.modelCoords[0] +
+        t * (vertexB.modelCoords[0] - vertexA.modelCoords[0]),
+      vertexA.modelCoords[1] +
+        t * (vertexB.modelCoords[1] - vertexA.modelCoords[1]),
+      vertexA.modelCoords[2] +
+        t * (vertexB.modelCoords[2] - vertexA.modelCoords[2]),
     ];
+    return result;
   }
 
-  public getIntersectingPoint(vertexB: VertexInstance, t: number): number[] {
-    return [
-      this.modelCoordinates[0] +
-        t * (vertexB.modelCoordinates[0] - this.modelCoordinates[0]),
-      this.modelCoordinates[1] +
-        t * (vertexB.modelCoordinates[1] - this.modelCoordinates[1]),
-      this.modelCoordinates[2] +
-        t * (vertexB.modelCoordinates[2] - this.modelCoordinates[2]),
+  public getIntersectingPoint(vertexB: VertexInstance, t: number) {
+    const result: Coords = [
+      this.modelCoords[0] + t * (vertexB.modelCoords[0] - this.modelCoords[0]),
+      this.modelCoords[1] + t * (vertexB.modelCoords[1] - this.modelCoords[1]),
+      this.modelCoords[2] + t * (vertexB.modelCoords[2] - this.modelCoords[2]),
     ];
+    return result;
   }
 }

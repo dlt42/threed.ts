@@ -1,12 +1,13 @@
+import { Coords } from '../common/common.types';
 import PolygonInstance from '../objectinstance/PolygonInstance';
 
 export default class ClipPlane {
   public normal0: number;
   public normal1: number;
   public normal2: number;
-  public point: number[];
+  public point: Coords;
 
-  public constructor(pointA: number[], pointB: number[], pointC: number[]) {
+  public constructor(pointA: Coords, pointB: Coords, pointC: Coords) {
     this.point = pointB;
     const array: number[] = PolygonInstance.calculateNormal(
       pointA,

@@ -1,13 +1,14 @@
+import { Coords } from '../../common/common.types';
 import PolygonInstance from '../../objectinstance/PolygonInstance';
 import Renderer from './Renderer';
 
 export default class ShadedRenderer extends Renderer {
-  static twoFiveFour: number = 254.0;
+  static twoFiveFour = 254.0;
 
   plot(
-    pointA: number[],
-    pointB: number[],
-    pointC: number[],
+    pointA: Coords,
+    pointB: Coords,
+    pointC: Coords,
     i1: number,
     i2: number,
     i3: number
@@ -122,9 +123,9 @@ export default class ShadedRenderer extends Renderer {
       const s = polygon.surfaceNormal;
 
       for (let i = 0; i < l - 2; i++) {
-        let pointA = v[0].screenCoordinates;
-        let pointB = v[i + 1].screenCoordinates;
-        let pointC = v[i + 2].screenCoordinates;
+        let pointA = v[0].screenCoords;
+        let pointB = v[i + 1].screenCoords;
+        let pointC = v[i + 2].screenCoords;
 
         const vertA = v[0].get(s);
         const vertB = v[i + 1].get(s);
@@ -170,7 +171,7 @@ export default class ShadedRenderer extends Renderer {
           this.plot(pointA, pointB, pointC, iA, iB, iC);
         } else {
           const multiplier = (pointB[1] - pointA[1]) / (pointC[1] - pointA[1]);
-          const pointN = [
+          const pointN: Coords = [
             pointA[0] + (pointC[0] - pointA[0]) * multiplier,
             pointB[1],
             pointA[2] + (pointC[2] - pointA[2]) * multiplier,

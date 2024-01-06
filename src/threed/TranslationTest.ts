@@ -1,9 +1,7 @@
 import Color from './common/Color';
 import Matrix from './common/Matrix';
-import Rotation from './common/Rotation';
-import Translation from './common/Translation';
-import FlatShadedLightModel from './lighting/FlatShadedLightModel';
-import GouraudShadedLightModel from './lighting/GouraudShadedLightModel';
+import { Rotation, Translation } from './common/Transformation';
+import LightModel from './lighting/LightModel';
 import LightSource from './lighting/LightSource';
 import ModelDefinition from './objectdefinition/ModelDefinition';
 import ModelDefinitionGenerator from './objectdefinition/ModelDefinitionGenerator';
@@ -18,67 +16,42 @@ import TestFrame from './TestFrame';
 import ViewPoint from './world/ViewPoint';
 import World from './world/World';
 
-type LightModelType = 'flat' | 'gouraud';
-const modelType: LightModelType = 'flat';
-
 export class TranslationTest extends TestFrame {
-  private rotation: Rotation = new Rotation(0, 0, 0);
-  private count: number = 50;
+  private rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
+  private count = 50;
 
-  private add: number = -1;
+  private add = -1;
 
-  public addModels(): void {
+  public addModels() {
     if (!this.world) {
       throw Error('Invalid state');
     }
-    // const model: ModelDefinition = ModelDefinitionGenerator.tube(
-    //   200,
-    //   200,
-    //   200,
-    //   10,
-    //   Color.GREEN
-    // );
-
-    // const model: ModelDefinition = ModelDefinitionGenerator.cylinder(
-    //   200,
-    //   200,
-    //   30,
-    //   Color.GREEN
-    //);
-    // const model: ModelDefinition = ModelDefinitionGenerator.sphere(
-    //   200,
-    //   18,
-    //   Color.GREEN
-    // );
-
-    const model: ModelDefinition = ModelDefinitionGenerator.cube(
-      80,
-      Color.GREEN
-    );
-    // const model: ModelDefinition = ModelDefinitionGenerator.surfaceXY(
-    //   200,
-    //   Color.GREEN
-    // );
+    let model: ModelDefinition;
+    model = ModelDefinitionGenerator.tube(200, 200, 200, 10, Color.GREEN);
+    // model = ModelDefinitionGenerator.cylinder(200, 200, 30, Color.GREEN);
+    // model = ModelDefinitionGenerator.sphere(200, 18, Color.GREEN);
+    // model = ModelDefinitionGenerator.surfaceXY(200, Color.GREEN);
+    model = ModelDefinitionGenerator.cube(80, Color.GREEN);
     const generator: ModelInstanceGenerator = new ModelInstanceGenerator();
-    for (let i: number = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       const instance: ModelInstance = generator.generateInstance(model);
       this.world.addModel(instance);
-      this.world.transformModel(instance, new Translation(0, 0, 1000));
+      this.world.transformModel(
+        instance,
+        new Translation({ x: 0, y: 0, z: 1000 })
+      );
     }
   }
 
-  public createScene(): void {
-    this.viewPoint = new ViewPoint([0, 0, 0], new Rotation(0, 0, 0));
+  public createScene() {
+    this.viewPoint = new ViewPoint(
+      [0, 0, 0],
+      new Rotation({ x: 0, y: 0, z: 0 })
+    );
     this.lightSource = new LightSource([0, 0, 0]);
 
-    switch (modelType) {
-      case 'flat':
-        this.lightModel = new FlatShadedLightModel(this.lightSource, 0.3);
-        break;
-      case 'gouraud':
-        this.lightModel = new GouraudShadedLightModel(this.lightSource, 0.3);
-        break;
-    }
+    this.lightModel = new LightModel(this.lightSource, 0.3, 'flat');
+
     this.world = new World(this.lightModel, this.viewPoint);
     // this.world.switchBackfaceCull(false);
     const screenArea: ScreenArea | null = this.getScreenArea();
@@ -97,7 +70,7 @@ export class TranslationTest extends TestFrame {
     screenArea.addListener(this.viewVolume);
   }
 
-  public getRotation(): Rotation | null {
+  public getRotation() {
     return this.rotation;
   }
 
@@ -150,7 +123,7 @@ export class TranslationTest extends TestFrame {
     if (mouseY < this.lastY) {
       x = 357;
     }
-    this.rotation.set(x, y, 0);
+    this.rotation.set({ x, y, z: 0 });
     this.lastX = mouseX;
     this.lastY = mouseY;
   }

@@ -8,8 +8,8 @@ import World from './world/World';
 
 export default abstract class TestFrame {
   protected screenArea: ScreenArea | null = null;
-  protected lastX: number = 0;
-  protected lastY: number = 0;
+  protected lastX = 0;
+  protected lastY = 0;
   protected world: World | null = null;
   protected lightModel: LightModel | null = null;
   protected lightSource: LightSource | null = null;
@@ -25,11 +25,11 @@ export default abstract class TestFrame {
 
   public abstract createScene(): void;
 
-  public getScreenArea(): ScreenArea | null {
+  public getScreenArea() {
     return this.screenArea;
   }
 
-  private initialise(canvas: HTMLCanvasElement): void {
+  private initialise(canvas: HTMLCanvasElement) {
     this.screenArea = new ScreenArea(600, 600, canvas);
     this.lastX = 200;
     this.lastY = 200;

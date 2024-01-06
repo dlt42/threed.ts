@@ -4,35 +4,35 @@ export default abstract class TrigTables {
   public static sinValues360: number[] = TrigTables.calcSin360();
   public static cosValues360: number[] = TrigTables.calcCos360();
 
-  private static calcCos(): number[] {
+  private static calcCos() {
     const cos: number[] = [];
-    for (let angle: number = 0.0; angle < 3600.0; angle++)
+    for (let angle = 0.0; angle < 3600.0; angle++)
       cos[angle] = Math.cos(this.toRadians(angle / 10));
     return cos;
   }
 
-  private static calcCos360(): number[] {
+  private static calcCos360() {
     const cos: number[] = [];
-    for (let angle: number = 0.0; angle < 360.0; angle++)
+    for (let angle = 0.0; angle < 360.0; angle++)
       cos[angle] = Math.cos(this.toRadians(angle));
     return cos;
   }
 
-  private static calcSin(): number[] {
+  private static calcSin() {
     const sin: number[] = [];
-    for (let angle: number = 0.0; angle < 3600.0; angle++)
+    for (let angle = 0.0; angle < 3600.0; angle++)
       sin[angle] = Math.sin(this.toRadians(angle / 10.0));
     return sin;
   }
 
-  private static calcSin360(): number[] {
+  private static calcSin360() {
     const sin: number[] = [];
-    for (let angle: number = 0.0; angle < 360.0; angle++)
+    for (let angle = 0.0; angle < 360.0; angle++)
       sin[angle] = Math.sin(this.toRadians(angle));
     return sin;
   }
 
-  private static toRadians(angle: number): number {
+  private static toRadians(angle: number) {
     return (angle * Math.PI) / 180;
   }
 

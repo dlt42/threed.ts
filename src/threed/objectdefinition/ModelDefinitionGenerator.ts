@@ -1,6 +1,6 @@
 import Color from '../common/Color';
 import Matrix from '../common/Matrix';
-import Rotation from '../common/Rotation';
+import { Rotation } from '../common/Transformation';
 import TrigTables from '../common/TrigTables';
 import ModelDefinition from './ModelDefinition';
 import PolygonDefinition from './PolygonDefinition';
@@ -12,7 +12,7 @@ export default class ModelDefinitionGenerator {
     sizeY: number,
     sizeZ: number,
     color: Color
-  ): ModelDefinition {
+  ) {
     const vertices: VertexDefinition[] = [];
     vertices[0] = new VertexDefinition([-sizeX, sizeY, -sizeZ]);
     vertices[1] = new VertexDefinition([-sizeX, sizeY, sizeZ]);
@@ -90,7 +90,7 @@ export default class ModelDefinitionGenerator {
     targetModel: ModelDefinition,
     srcModel: ModelDefinition,
     copyMatrix: Matrix
-  ): void {
+  ) {
     const polygonArray: PolygonDefinition[] = targetModel.getPolygons();
     const sourcePolygonArray: PolygonDefinition[] = srcModel.getPolygons();
     const tempPolygonArray: PolygonDefinition[] = [];
@@ -104,7 +104,7 @@ export default class ModelDefinitionGenerator {
         const sourceVertex = sourceVertexArray[v];
         if (!vertexCopyHashtable.has(sourceVertex)) {
           const newVertex = sourceVertex.copyDirect();
-          copyMatrix.transformCoords(newVertex.getCoordinates());
+          copyMatrix.transformCoords(newVertex.getCoords());
           vertexCopyHashtable.set(sourceVertex, newVertex);
         }
         newVertexArray[v] = vertexCopyHashtable.get(
@@ -122,7 +122,7 @@ export default class ModelDefinitionGenerator {
     targetModel.setPolygons(tempPolygonArray);
   }
 
-  public static cube(size: number, color: Color): ModelDefinition {
+  public static cube(size: number, color: Color) {
     const vertices: VertexDefinition[] = [];
     vertices[0] = new VertexDefinition([-size, size, -size]);
     vertices[1] = new VertexDefinition([-size, size, size]);
@@ -201,31 +201,31 @@ export default class ModelDefinitionGenerator {
     height: number,
     numpoints: number,
     color: Color
-  ): ModelDefinition {
+  ) {
     const vertices: VertexDefinition[] = [];
-    const h: number = height / 2;
-    for (let l: number = 0; l < numpoints; l++) {
-      const a: number = (360 / numpoints) * l;
-      const x: number = TrigTables.sinValues360[(a | 0) % 360] * radius;
-      const z: number = TrigTables.cosValues360[(a | 0) % 360] * radius;
+    const h = height / 2;
+    for (let l = 0; l < numpoints; l++) {
+      const a = (360 / numpoints) * l;
+      const x = TrigTables.sinValues360[(a | 0) % 360] * radius;
+      const z = TrigTables.cosValues360[(a | 0) % 360] * radius;
       vertices[l] = new VertexDefinition([x, -h, z]);
     }
-    for (let l: number = 0; l < numpoints; l++) {
-      const a: number = (360 / numpoints) * l;
-      const x: number = TrigTables.sinValues360[(a | 0) % 360] * radius;
-      const z: number = TrigTables.cosValues360[(a | 0) % 360] * radius;
+    for (let l = 0; l < numpoints; l++) {
+      const a = (360 / numpoints) * l;
+      const x = TrigTables.sinValues360[(a | 0) % 360] * radius;
+      const z = TrigTables.cosValues360[(a | 0) % 360] * radius;
       vertices[l + numpoints] = new VertexDefinition([x, h, z]);
     }
     vertices[numpoints * 2] = new VertexDefinition([0, -h, 0]);
     vertices[numpoints * 2 + 1] = new VertexDefinition([0, h, 0]);
     const polygons: PolygonDefinition[] = [];
-    for (let t: number = 0; t < numpoints; t++)
+    for (let t = 0; t < numpoints; t++)
       polygons[t] = new PolygonDefinition(
         [vertices[t], vertices[(t + 1) % numpoints], vertices[t + numpoints]],
         color
       );
 
-    for (let u: number = 0; u < numpoints; u++)
+    for (let u = 0; u < numpoints; u++)
       polygons[u + numpoints] = new PolygonDefinition(
         [
           vertices[u + numpoints],
@@ -234,7 +234,7 @@ export default class ModelDefinitionGenerator {
         ],
         color
       );
-    for (let v: number = 0; v < numpoints; v++)
+    for (let v = 0; v < numpoints; v++)
       polygons[v + numpoints * 2] = new PolygonDefinition(
         [
           vertices[v + numpoints].copyDirect(),
@@ -244,7 +244,7 @@ export default class ModelDefinitionGenerator {
         color
       );
 
-    for (let w: number = 0; w < numpoints; w++)
+    for (let w = 0; w < numpoints; w++)
       polygons[w + numpoints * 3] = new PolygonDefinition(
         [
           vertices[w].copyDirect(),
@@ -257,15 +257,17 @@ export default class ModelDefinitionGenerator {
     return new ModelDefinition(polygons);
   }
 
-  public static getSphereCoordinates(
+  public static getSphereCoords(
     radius: number,
     angle: number,
     numpoints: number
-  ): VertexDefinition[] {
+  ) {
     const vertices: VertexDefinition[] = [];
-    const matrix: Matrix = Matrix.getRotationMatrix(new Rotation(angle, 0, 0));
+    const matrix: Matrix = Matrix.getRotationMatrix(
+      new Rotation({ x: angle, y: 0, z: 0 })
+    );
     const split = 180.0 / numpoints;
-    for (let i: number = 0; i < numpoints; i++) {
+    for (let i = 0; i < numpoints; i++) {
       // Use trigonometry to find each vertice.
       const x = TrigTables.cosValues360[((split * i) | 0) % 360] * radius;
       const y = TrigTables.sinValues360[((split * i) | 0) % 360] * radius;
@@ -275,24 +277,20 @@ export default class ModelDefinitionGenerator {
       vertices[i] = new VertexDefinition([x, y, z]);
 
       // Transform the vertex into the correct position.
-      matrix.transformCoords(vertices[i].getCoordinates());
+      matrix.transformCoords(vertices[i].getCoords());
     }
     return vertices;
   }
 
-  public static sphere(
-    radius: number,
-    numpoints: number,
-    color: Color
-  ): ModelDefinition {
+  public static sphere(radius: number, numpoints: number, color: Color) {
     const MDG = ModelDefinitionGenerator;
 
     const vertices: VertexDefinition[][] = [];
     const polygons: Array<PolygonDefinition> = [];
     const split = 360.0 / numpoints;
 
-    for (let i: number = 0; i < numpoints; i++)
-      vertices[i] = MDG.getSphereCoordinates(radius, split * i, numpoints);
+    for (let i = 0; i < numpoints; i++)
+      vertices[i] = MDG.getSphereCoords(radius, split * i, numpoints);
 
     for (let i = 0; i < numpoints; i++) {
       for (let j = 1; j < numpoints - 1; j++) {
@@ -307,7 +305,7 @@ export default class ModelDefinitionGenerator {
 
     const end1 = new VertexDefinition([radius, 0, 0]);
     const end2 = new VertexDefinition([-radius, 0, 0]);
-    for (let i: number = 0; i < numpoints; i++) {
+    for (let i = 0; i < numpoints; i++) {
       const v1A = vertices[i][1];
       const v2A = vertices[(i + 1) % numpoints][1];
       polygons.push(new PolygonDefinition([v1A, v2A, end1], color));
@@ -318,7 +316,7 @@ export default class ModelDefinitionGenerator {
     return new ModelDefinition(polygons);
   }
 
-  public static surfaceXY(size: number, color: Color): ModelDefinition {
+  public static surfaceXY(size: number, color: Color) {
     const vertices: VertexDefinition[] = [];
     vertices[0] = new VertexDefinition([-size, -size, 0]);
     vertices[1] = new VertexDefinition([-size, size, 0]);
@@ -336,7 +334,7 @@ export default class ModelDefinitionGenerator {
     return new ModelDefinition(polygons);
   }
 
-  public static surfaceXZ(size: number, color: Color): ModelDefinition {
+  public static surfaceXZ(size: number, color: Color) {
     const vertices: VertexDefinition[] = [];
     vertices[0] = new VertexDefinition([-size, 0, -size]);
     vertices[1] = new VertexDefinition([-size, 0, size]);
@@ -360,28 +358,28 @@ export default class ModelDefinitionGenerator {
     height: number,
     numpoints: number,
     color: Color
-  ): ModelDefinition {
+  ) {
     const vertices1: VertexDefinition[] = [];
     const vertices2: VertexDefinition[] = [];
-    const h: number = height / 2;
-    for (let l: number = 0; l < numpoints; l++) {
-      const a: number = (360 / numpoints) * l;
-      const x1: number = TrigTables.sinValues360[(a | 0) % 360] * radius1;
-      const z1: number = TrigTables.cosValues360[(a | 0) % 360] * radius1;
+    const h = height / 2;
+    for (let l = 0; l < numpoints; l++) {
+      const a = (360 / numpoints) * l;
+      const x1 = TrigTables.sinValues360[(a | 0) % 360] * radius1;
+      const z1 = TrigTables.cosValues360[(a | 0) % 360] * radius1;
       vertices1[l] = new VertexDefinition([x1, -h, z1]);
       vertices2[l] = new VertexDefinition([x1, -h, z1]);
     }
-    for (let l: number = 0; l < numpoints; l++) {
-      const a: number = (360 / numpoints) * l;
-      const x1: number = TrigTables.sinValues360[(a | 0) % 360] * radius1;
-      const z1: number = TrigTables.cosValues360[(a | 0) % 360] * radius1;
-      const x2: number = TrigTables.sinValues360[(a | 0) % 360] * radius2;
-      const z2: number = TrigTables.cosValues360[(a | 0) % 360] * radius2;
+    for (let l = 0; l < numpoints; l++) {
+      const a = (360 / numpoints) * l;
+      const x1 = TrigTables.sinValues360[(a | 0) % 360] * radius1;
+      const z1 = TrigTables.cosValues360[(a | 0) % 360] * radius1;
+      const x2 = TrigTables.sinValues360[(a | 0) % 360] * radius2;
+      const z2 = TrigTables.cosValues360[(a | 0) % 360] * radius2;
       vertices1[l + numpoints] = new VertexDefinition([x1, h, z1]);
       vertices2[l + numpoints] = new VertexDefinition([x2, h, z2]);
     }
     const polygons: PolygonDefinition[] = [];
-    for (let t: number = 0; t < numpoints; t++) {
+    for (let t = 0; t < numpoints; t++) {
       polygons[t] = new PolygonDefinition(
         [
           vertices1[t],
@@ -399,7 +397,7 @@ export default class ModelDefinitionGenerator {
         color
       );
     }
-    for (let u: number = 0; u < numpoints; u++) {
+    for (let u = 0; u < numpoints; u++) {
       polygons[u + numpoints * 2] = new PolygonDefinition(
         [
           vertices1[u + numpoints],
@@ -417,7 +415,7 @@ export default class ModelDefinitionGenerator {
         color
       );
     }
-    for (let v: number = 0; v < numpoints; v++) {
+    for (let v = 0; v < numpoints; v++) {
       polygons[v + numpoints * 4] = new PolygonDefinition(
         [
           vertices1[v + numpoints].copyDirect(),

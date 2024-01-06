@@ -1,14 +1,14 @@
+import { Coords } from '../common/common.types';
 import Matrix from '../common/Matrix';
-import Rotation from '../common/Rotation';
-import Scale from '../common/Scale';
-import Translation from '../common/Translation';
+import { Rotation, Scale, Translation } from '../common/Transformation';
 import LightModel from '../lighting/LightModel';
 import LightSource from '../lighting/LightSource';
-import LightModelEvent from '../notification/LightModelEvent';
-import LightModelListener from '../notification/LightModelListener';
-import ModelInstanceListener from '../notification/ModelInstanceListener';
-import ViewPointEvent from '../notification/ViewPointEvent';
-import ViewPointListener from '../notification/ViewPointListener';
+import { LightModelEvent, ViewPointEvent } from '../notification/Event';
+import {
+  LightModelListener,
+  ModelInstanceListener,
+  ViewPointListener,
+} from '../notification/Listeners';
 import ModelInstance from '../objectinstance/ModelInstance';
 import ViewPoint from './ViewPoint';
 
@@ -30,7 +30,7 @@ export default class World
     this.backfaceCull = true;
     this.intensityCalculate = true;
     this.viewPoint =
-      viewPoint || new ViewPoint([0, 0, 0], new Rotation(0, 0, 0));
+      viewPoint || new ViewPoint([0, 0, 0], new Rotation({ x: 0, y: 0, z: 0 }));
     this.viewPositionChanged = true;
     this.viewPoint.addListener(this);
   }
@@ -66,11 +66,11 @@ export default class World
   private calulateIntensity(model: ModelInstance) {
     if (!model.intensityLocked)
       model.vertexArray.forEach((current) =>
-        this.lightModel.calculateIntensity(current.worldCoordinates, current)
+        this.lightModel.calculateIntensity(current.worldCoords, current)
       );
   }
 
-  public getViewPoint(): ViewPoint {
+  public getViewPoint() {
     return this.viewPoint;
   }
 
@@ -114,7 +114,7 @@ export default class World
 
   public rotateLightSourceAroundPoint(
     light: LightSource,
-    point: number[],
+    point: Coords,
     rotation: Rotation
   ) {
     const translateToOrigin: Matrix = Matrix.getTranslationMatrix([
@@ -132,23 +132,20 @@ export default class World
       transformMatrix,
       translateToPosition
     );
-    const coords: number[] = light.getPosition();
+    const coords: Coords = light.getPosition();
     transformMatrix.transformCoords(coords);
     light.setPosition(coords);
   }
 
   public rotateModelAroundPoint(
     model: ModelInstance,
-    point: number[],
+    point: Coords,
     rotation: Rotation
   ) {
     model.transformWorld(Matrix.getRotateModelAroundPoint(point, rotation));
   }
 
-  public getRotateModelAroundPoint(
-    point: number[],
-    rotation: Rotation
-  ): Matrix {
+  public getRotateModelAroundPoint(point: Coords, rotation: Rotation) {
     return Matrix.multiplyMatrices(
       Matrix.multiplyMatrices(
         Matrix.getTranslationMatrixForValues(-point[0], -point[1], -point[2]),
@@ -189,13 +186,8 @@ export default class World
 
   public transformModel(
     model: ModelInstance,
-    tranform: Rotation | Scale | Translation
+    tranform: Scale | Translation | Rotation
   ) {
-    if (tranform instanceof Rotation)
-      model.transformWorld(Matrix.getRotationMatrix(tranform));
-    else if (tranform instanceof Scale)
-      model.transformWorld(Matrix.getScaleMatrix(tranform));
-    else if (tranform instanceof Translation)
-      model.transformWorld(Matrix.getTranslationMatrixForTranslation(tranform));
+    model.transformWorld(tranform.getMatrix());
   }
 }
