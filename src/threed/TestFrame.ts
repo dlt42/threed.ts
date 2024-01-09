@@ -17,6 +17,8 @@ export type RenderSceneArgs = {
   objects: ModelInstance[];
 };
 
+export type RenderType = 'shaded' | 'wireframe';
+
 export default abstract class TestFrame {
   private screenArea: ScreenArea | null = null;
   private lastX = 0;
@@ -27,10 +29,12 @@ export default abstract class TestFrame {
   private viewPoint: ViewPoint | null = null;
   private renderer: Renderer | null = null;
   private viewVolume: ViewVolume | null = null;
+  private renderType: RenderType;
 
   private rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
 
-  public constructor(canvas: HTMLCanvasElement) {
+  public constructor(canvas: HTMLCanvasElement, renderType: RenderType) {
+    this.renderType = renderType;
     this.initialise(canvas);
   }
 
@@ -51,10 +55,10 @@ export default abstract class TestFrame {
     // this.world.switchBackfaceCull(false);
     const screenArea: ScreenArea | null = this.getScreenArea();
     if (!screenArea) throw Error('No Screen Area');
-    const shaded = true;
-    this.renderer = shaded
-      ? new ShadedRenderer(screenArea, new DefaultColourConverter())
-      : new WireFrameRenderer(screenArea, new DefaultColourConverter());
+    this.renderer =
+      this.renderType === 'shaded'
+        ? new ShadedRenderer(screenArea, new DefaultColourConverter())
+        : new WireFrameRenderer(screenArea, new DefaultColourConverter());
     screenArea?.getCanvas().addEventListener('mousemove', (e) => {
       const flags = e.buttons !== undefined ? e.buttons : e.which;
       if ((flags & 1) === 1) {

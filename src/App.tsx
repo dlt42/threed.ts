@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 
 import { PerspectiveTest } from './threed/PerspectiveTest';
-import TestFrame from './threed/TestFrame';
+import TestFrame, { RenderType } from './threed/TestFrame';
 import { TranslationTest } from './threed/TranslationTest';
 
 type TestType = 'translation' | 'perspective';
 
 const App = () => {
   const [testType, setTestType] = useState<TestType>('perspective');
+  const [renderType, setRenderType] = useState<RenderType>('shaded');
   useEffect(() => {
     try {
       const canvas: HTMLCanvasElement | null = document.getElementById(
@@ -17,10 +18,10 @@ const App = () => {
       let frame: TestFrame;
       switch (testType) {
         case 'translation':
-          frame = new TranslationTest(canvas);
+          frame = new TranslationTest(canvas, renderType);
           break;
         case 'perspective':
-          frame = new PerspectiveTest(canvas);
+          frame = new PerspectiveTest(canvas, renderType);
           break;
       }
       frame.createScene();
@@ -58,14 +59,32 @@ const App = () => {
           backgroundColor: 'black',
         }}
       ></canvas>
-      <select
-        id='test-type'
-        onChange={(e) => setTestType(e.target.value as TestType)}
-        style={{ fontSize: '1rem', padding: '.25rem' }}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '1rem',
+        }}
       >
-        <option value='perspective'>Perspective</option>
-        <option value='translation'>Translation</option>
-      </select>
+        <select
+          id='test-type'
+          value={testType}
+          onChange={(e) => setTestType(e.target.value as TestType)}
+          style={{ fontSize: '1rem', padding: '.25rem' }}
+        >
+          <option value='perspective'>Perspective</option>
+          <option value='translation'>Translation</option>
+        </select>
+        <select
+          id='render-type'
+          value={renderType}
+          onChange={(e) => setRenderType(e.target.value as RenderType)}
+          style={{ fontSize: '1rem', padding: '.25rem' }}
+        >
+          <option value='shaded'>Shaded</option>
+          <option value='wireframe'>Wireframe</option>
+        </select>
+      </div>
     </div>
   );
 };
