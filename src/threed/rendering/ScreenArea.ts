@@ -69,7 +69,10 @@ export default class ScreenArea {
   public refreshBuffer() {
     if (this.buffer !== null) {
       const ctx = this.canvas.getContext('2d');
-      if (ctx) ctx.putImageData(this.buffer, 0, 0);
+      if (ctx) {
+        ctx.fillStyle = 'blue';
+        ctx.putImageData(this.buffer, 0, 0);
+      }
       if (this.saveBuffer === null) {
         this.saveBuffer = new ImageData(this.width, this.height, {
           colorSpace: 'srgb',
