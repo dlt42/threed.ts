@@ -164,15 +164,15 @@ export default abstract class TestFrame {
         );
       case 'tube':
         return ModelDefinitionGenerator.tube(
-          200 * checkedScale,
-          200 * checkedScale,
-          200 * checkedScale,
+          100 * checkedScale,
+          100 * checkedScale,
+          100 * checkedScale,
           24,
           Color.GREEN
         );
       case 'surface':
         return ModelDefinitionGenerator.surfaceXY(
-          200 * checkedScale,
+          80 * checkedScale,
           Color.GREEN
         );
     }
