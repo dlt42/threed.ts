@@ -9,7 +9,7 @@ export default class WireFrameRenderer extends Renderer {
     ys = ys | 0;
     xe = xe | 0;
     ye = ye | 0;
-    const color: Color = Color.BLUE;
+    const color: Color = Color.WHITE;
     if (ys === ye) {
       if (ys > 0 && ys < this.fullHeight) {
         const line = (ys - 1) * this.fullWidth;
