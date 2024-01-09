@@ -1,6 +1,10 @@
+import Color from './common/Color';
 import { Rotation } from './common/Transformation';
+import { LightModelType } from './lighting/lighting.types';
 import LightModel from './lighting/LightModel';
 import LightSource from './lighting/LightSource';
+import ModelDefinition from './objectdefinition/ModelDefinition';
+import ModelDefinitionGenerator from './objectdefinition/ModelDefinitionGenerator';
 import ModelInstance from './objectinstance/ModelInstance';
 import DefaultColourConverter from './rendering/DefaultColourConverter';
 import Renderer from './rendering/renderers/Renderer';
@@ -19,6 +23,16 @@ export type RenderSceneArgs = {
 
 export type RenderType = 'shaded' | 'wireframe';
 
+export type TestType = 'translation' | 'perspective' | 'culling';
+export type ModelType = 'cube' | 'sphere' | 'cylinder' | 'tube' | 'surface';
+
+export type TestFrameParams = {
+  canvas: HTMLCanvasElement;
+  renderType: RenderType;
+  lightModelType: LightModelType;
+  modelType: ModelType;
+};
+
 export default abstract class TestFrame {
   private screenArea: ScreenArea | null = null;
   private lastX = 0;
@@ -30,11 +44,20 @@ export default abstract class TestFrame {
   private renderer: Renderer | null = null;
   private viewVolume: ViewVolume | null = null;
   private renderType: RenderType;
+  private lightModelType: LightModelType;
+  private modelType: ModelType;
 
   private rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
 
-  public constructor(canvas: HTMLCanvasElement, renderType: RenderType) {
+  public constructor({
+    canvas,
+    lightModelType,
+    renderType,
+    modelType,
+  }: TestFrameParams) {
     this.renderType = renderType;
+    this.lightModelType = lightModelType;
+    this.modelType = modelType;
     this.initialise(canvas);
   }
 
@@ -50,7 +73,11 @@ export default abstract class TestFrame {
       new Rotation({ x: 0, y: 0, z: 0 })
     );
     this.lightSource = new LightSource([0, 0, 0]);
-    this.lightModel = new LightModel(this.lightSource, 0.3, 'flat');
+    this.lightModel = new LightModel(
+      this.lightSource,
+      0.3,
+      this.lightModelType
+    );
     this.world = new World(this.lightModel, this.viewPoint);
     // this.world.switchBackfaceCull(false);
     const screenArea: ScreenArea | null = this.getScreenArea();
@@ -94,7 +121,8 @@ export default abstract class TestFrame {
   }
 
   private initialise(canvas: HTMLCanvasElement) {
-    this.screenArea = new ScreenArea(600, 600, canvas);
+    this.screenArea = new ScreenArea(canvas);
+
     this.lastX = 200;
     this.lastY = 200;
   }
@@ -114,5 +142,39 @@ export default abstract class TestFrame {
       rotation: this.rotation.copy(),
       objects: this.world.objectArray,
     };
+  }
+
+  public createModel(scale?: number): ModelDefinition {
+    const checkedScale = scale || 1;
+    switch (this.modelType) {
+      case 'cube':
+        return ModelDefinitionGenerator.cube(80 * checkedScale, Color.GREEN);
+      case 'sphere':
+        return ModelDefinitionGenerator.sphere(
+          100 * checkedScale,
+          24,
+          Color.GREEN
+        );
+      case 'cylinder':
+        return ModelDefinitionGenerator.cylinder(
+          100 * checkedScale,
+          250 * checkedScale,
+          24,
+          Color.GREEN
+        );
+      case 'tube':
+        return ModelDefinitionGenerator.tube(
+          200 * checkedScale,
+          200 * checkedScale,
+          200 * checkedScale,
+          24,
+          Color.GREEN
+        );
+      case 'surface':
+        return ModelDefinitionGenerator.surfaceXY(
+          200 * checkedScale,
+          Color.GREEN
+        );
+    }
   }
 }

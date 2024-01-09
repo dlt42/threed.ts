@@ -1,8 +1,5 @@
-import Color from './common/Color';
 import Matrix from './common/Matrix';
 import { Translation } from './common/Transformation';
-import ModelDefinition from './objectdefinition/ModelDefinition';
-import ModelDefinitionGenerator from './objectdefinition/ModelDefinitionGenerator';
 import ModelInstance from './objectinstance/ModelInstance';
 import ModelInstanceGenerator from './objectinstance/ModelInstanceGenerator';
 import TestFrame, { RenderSceneArgs } from './TestFrame';
@@ -16,12 +13,7 @@ export class TranslationTest extends TestFrame {
     if (!this.world) {
       throw Error('Invalid state');
     }
-    let model: ModelDefinition;
-    model = ModelDefinitionGenerator.tube(200, 200, 200, 10, Color.GREEN);
-    // model = ModelDefinitionGenerator.cylinder(200, 200, 30, Color.GREEN);
-    // model = ModelDefinitionGenerator.sphere(200, 18, Color.GREEN);
-    // model = ModelDefinitionGenerator.surfaceXY(200, Color.GREEN);
-    model = ModelDefinitionGenerator.cube(80, Color.GREEN);
+    const model = this.createModel();
     const generator: ModelInstanceGenerator = new ModelInstanceGenerator();
     for (let i = 0; i < 3; i++) {
       const instance: ModelInstance = generator.generateInstance(model);

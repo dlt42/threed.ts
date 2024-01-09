@@ -331,6 +331,14 @@ export default class ModelDefinitionGenerator {
       [vertices[2], vertices[3], vertices[0]],
       color
     );
+    polygons[2] = new PolygonDefinition(
+      [vertices[1], vertices[0], vertices[2]],
+      color
+    );
+    polygons[3] = new PolygonDefinition(
+      [vertices[0], vertices[3], vertices[2]],
+      color
+    );
     return new ModelDefinition(polygons);
   }
 
@@ -349,6 +357,14 @@ export default class ModelDefinitionGenerator {
       [vertices[2], vertices[3], vertices[0]],
       color
     );
+    polygons[2] = new PolygonDefinition(
+      [vertices[1], vertices[0], vertices[2]],
+      color
+    );
+    polygons[3] = new PolygonDefinition(
+      [vertices[0], vertices[3], vertices[2]],
+      color
+    );
     return new ModelDefinition(polygons);
   }
 
@@ -364,17 +380,17 @@ export default class ModelDefinitionGenerator {
     const h = height / 2;
     for (let l = 0; l < numpoints; l++) {
       const a = (360 / numpoints) * l;
-      const x1 = TrigTables.sinValues360[(a | 0) % 360] * radius1;
-      const z1 = TrigTables.cosValues360[(a | 0) % 360] * radius1;
+      const x1 = TrigTables.sinValues360[a % 360] * radius1;
+      const z1 = TrigTables.cosValues360[a % 360] * radius1;
       vertices1[l] = new VertexDefinition([x1, -h, z1]);
       vertices2[l] = new VertexDefinition([x1, -h, z1]);
     }
     for (let l = 0; l < numpoints; l++) {
       const a = (360 / numpoints) * l;
-      const x1 = TrigTables.sinValues360[(a | 0) % 360] * radius1;
-      const z1 = TrigTables.cosValues360[(a | 0) % 360] * radius1;
-      const x2 = TrigTables.sinValues360[(a | 0) % 360] * radius2;
-      const z2 = TrigTables.cosValues360[(a | 0) % 360] * radius2;
+      const x1 = TrigTables.sinValues360[a % 360] * radius1;
+      const z1 = TrigTables.cosValues360[a % 360] * radius1;
+      const x2 = TrigTables.sinValues360[a % 360] * radius2;
+      const z2 = TrigTables.cosValues360[a % 360] * radius2;
       vertices1[l + numpoints] = new VertexDefinition([x1, h, z1]);
       vertices2[l + numpoints] = new VertexDefinition([x2, h, z2]);
     }

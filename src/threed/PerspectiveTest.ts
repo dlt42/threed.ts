@@ -1,6 +1,4 @@
-import Color from './common/Color';
 import { Rotation, Translation } from './common/Transformation';
-import ModelDefinitionGenerator from './objectdefinition/ModelDefinitionGenerator';
 import ModelInstanceGenerator from './objectinstance/ModelInstanceGenerator';
 import TestFrame, { RenderSceneArgs } from './TestFrame';
 
@@ -10,7 +8,7 @@ export class PerspectiveTest extends TestFrame {
       throw Error('Invalid state');
     }
 
-    const model = ModelDefinitionGenerator.cube(50, Color.GREEN);
+    const model = this.createModel();
 
     const generator = new ModelInstanceGenerator();
     for (let i = 0; i < 10; i++) {

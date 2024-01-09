@@ -6,13 +6,16 @@ export default class ScreenArea {
   private buffer: ImageData | null = null;
   private saveBuffer: ImageData | null = null;
   private listeners: ScreenAreaListener[] = [];
-  private width: number;
-  private height: number;
 
-  public constructor(width: number, height: number, canvas: HTMLCanvasElement) {
-    this.width = width;
-    this.height = height;
+  public constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+
+    const observer = new ResizeObserver(() => {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      this.resized();
+    });
+    observer.observe(canvas);
   }
 
   public getCanvas() {
@@ -21,22 +24,19 @@ export default class ScreenArea {
 
   public addListener(listener: ScreenAreaListener) {
     this.listeners.push(listener);
+    const { width, height } = this.canvas.getBoundingClientRect();
     listener.notify(
-      new ScreenAreaEvent(
-        this,
-        this.width,
-        this.height,
-        ScreenAreaEvent.RESIZED
-      )
+      new ScreenAreaEvent(this, width, height, ScreenAreaEvent.RESIZED)
     );
   }
 
   private clearBuffer() {
+    const { width, height } = this.canvas.getBoundingClientRect();
     if (this.buffer === null) {
-      if (this.width > 0 && this.height > 0) {
-        const arrayBuffer = new ArrayBuffer(this.width * this.height * 4);
+      if (width > 0 && height > 0) {
+        const arrayBuffer = new ArrayBuffer(width * height * 4);
         const pixels = new Uint8ClampedArray(arrayBuffer);
-        this.buffer = new ImageData(pixels, this.width, this.height, {
+        this.buffer = new ImageData(pixels, width, height, {
           colorSpace: 'srgb',
         });
       }
@@ -44,12 +44,7 @@ export default class ScreenArea {
       this.buffer.data.fill(0);
       this.listeners.forEach((current) =>
         current.notify(
-          new ScreenAreaEvent(
-            this,
-            this.width,
-            this.height,
-            ScreenAreaEvent.CLEARED
-          )
+          new ScreenAreaEvent(this, width, height, ScreenAreaEvent.CLEARED)
         )
       );
     }
@@ -74,7 +69,8 @@ export default class ScreenArea {
         ctx.putImageData(this.buffer, 0, 0);
       }
       if (this.saveBuffer === null) {
-        this.saveBuffer = new ImageData(this.width, this.height, {
+        const { width, height } = this.canvas.getBoundingClientRect();
+        this.saveBuffer = new ImageData(width, height, {
           colorSpace: 'srgb',
         });
         this.saveBuffer?.data.set(this.buffer.data.slice(0));
@@ -89,16 +85,12 @@ export default class ScreenArea {
   }
 
   public resized() {
+    const { width, height } = this.canvas.getBoundingClientRect();
     this.buffer = null;
     this.clearBuffer();
     this.listeners.forEach((current) =>
       current.notify(
-        new ScreenAreaEvent(
-          this,
-          this.width,
-          this.height,
-          ScreenAreaEvent.RESIZED
-        )
+        new ScreenAreaEvent(this, width, height, ScreenAreaEvent.RESIZED)
       )
     );
   }
