@@ -71,22 +71,34 @@ const App = () => {
         justifyContent: 'start',
         padding: '1rem',
         gap: '1rem',
-        height: '100%',
+        height: '100svh',
+        maxHeight: '100svh',
         alignItems: 'center',
+        overflow: 'hidden',
       }}
     >
-      <canvas
-        id='renderCanvas'
-        style={{
-          border: '1px solid black',
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          backgroundColor: 'black',
-        }}
-      ></canvas>
       <div
         style={{
+          display: 'flex',
+          flex: 1,
+          overflow: 'hidden',
+          width: '100%',
+        }}
+      >
+        <canvas
+          id='renderCanvas'
+          style={{
+            border: '1px solid black',
+            width: '100%',
+            backgroundColor: 'black',
+          }}
+        ></canvas>
+      </div>
+      <div
+        style={{
+          flexGrow: 0,
+          flexShrink: 0,
+          flexBasis: '0%',
           display: 'flex',
           flexDirection: 'row',
           gap: '1rem',

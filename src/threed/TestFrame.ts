@@ -61,11 +61,25 @@ export default abstract class TestFrame {
 
     this.lastX = 200;
     this.lastY = 200;
+
+    this.elements.screenArea.getCanvas().addEventListener('touchstart', (e) => {
+      if (e.targetTouches.length > 1) {
+        this.rotation.set({ x: 0, y: 0, z: 0 });
+        e.preventDefault();
+      }
+    });
+    this.elements.screenArea.getCanvas().addEventListener('touchmove', (e) => {
+      if (e.targetTouches.length === 1) {
+        this.mouseDragged(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+      }
+    });
     this.elements.screenArea.getCanvas().addEventListener('mousemove', (e) => {
       const flags = e.buttons !== undefined ? e.buttons : e.which;
       if ((flags & 1) === 1) {
         this.mouseDragged(e.pageX, e.pageY);
       }
+      return false;
     });
   }
 
@@ -82,7 +96,6 @@ export default abstract class TestFrame {
     const lightSource = new LightSource([0, 0, 0]);
     const lightModel = new LightModel(lightSource, 0.3, lightModelType);
     const world = new World(lightModel, viewPoint);
-    // this.world.switchBackfaceCull(false);
     const screenArea = new ScreenArea(canvas);
     const renderer =
       renderType === 'shaded'

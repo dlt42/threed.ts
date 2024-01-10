@@ -10,4 +10,7 @@ export default defineConfig({
     assetsDir: 'static',
     minify: 'esbuild',
   },
+  server: {
+    host: '0.0.0.0',
+  },
 });
