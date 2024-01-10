@@ -1,6 +1,6 @@
 import Color from './common/Color';
 import Matrix from './common/Matrix';
-import { Rotation, Translation } from './common/Transformation';
+import { Translation } from './common/Transformation';
 import ModelDefinitionGenerator from './objectdefinition/ModelDefinitionGenerator';
 import ModelInstanceGenerator from './objectinstance/ModelInstanceGenerator';
 import TestFrame from './TestFrame';

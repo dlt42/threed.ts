@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import ConfigSelect from './ConfigSelect';
 import { ClipPlaneTest } from './threed/ClipPlaneTest';
 import { CullingTest } from './threed/CullingTest';
 import { LightModelType } from './threed/lighting/lighting.types';
@@ -12,35 +13,6 @@ import TestFrame, {
   TestType,
 } from './threed/TestFrame';
 import { TranslationTest } from './threed/TranslationTest';
-
-type ConfigSelectProps<T> = {
-  value: keyof T;
-  id: string;
-  setValue: (value: keyof T) => void;
-  values: { label: string; value: keyof T }[];
-};
-
-const ConfigSelect = <T,>({
-  id,
-  value,
-  setValue,
-  values,
-}: ConfigSelectProps<T>) => {
-  return (
-    <select
-      id={id}
-      value={value.toString()}
-      onChange={(e) => setValue(e.target.value as keyof T)}
-      style={{ fontSize: '1rem', padding: '.25rem' }}
-    >
-      {values.map((current, index) => (
-        <option key={`${id}-${index}`} value={current.value.toString()}>
-          {current.label}
-        </option>
-      ))}
-    </select>
-  );
-};
 
 const App = () => {
   const [testType, setTestType] = useState<TestType>('perspective');
@@ -120,31 +92,34 @@ const App = () => {
           gap: '1rem',
         }}
       >
-        <select
+        <ConfigSelect
+          label='Test'
           id='test-type'
+          setValue={setTestType}
           value={testType}
-          onChange={(e) => setTestType(e.target.value as TestType)}
-          style={{ fontSize: '1rem', padding: '.25rem' }}
-        >
-          <option value='perspective'>Perspective</option>
-          <option value='translation'>Translation</option>
-          <option value='culling'>Culling</option>
-          <option value='clip-plane'>Clip Plane</option>
-          <option value='shading'>Shading</option>
-        </select>
+          values={[
+            { label: 'Shaded', value: 'perspective' },
+            { label: 'Translation', value: 'translation' },
+            { label: 'Culling', value: 'culling' },
+            { label: 'Clip Plane', value: 'clip-plane' },
+            { label: 'Shading', value: 'shading' },
+          ]}
+        />
 
-        <select
+        <ConfigSelect
+          label='Render'
           id='render-type'
+          setValue={setRenderType}
           value={renderType}
-          onChange={(e) => setRenderType(e.target.value as RenderType)}
-          style={{ fontSize: '1rem', padding: '.25rem' }}
-        >
-          <option value='shaded'>Shaded</option>
-          <option value='wireframe'>Wireframe</option>
-        </select>
+          values={[
+            { label: 'Shaded', value: 'shaded' },
+            { label: 'Wireframe', value: 'wireframe' },
+          ]}
+        />
 
         {renderType !== 'wireframe' && (
           <ConfigSelect
+            label='Light Model'
             id='light-model-type'
             setValue={setLightModelType}
             value={lightModelType}
@@ -157,6 +132,7 @@ const App = () => {
         )}
 
         <ConfigSelect
+          label='Model'
           id='model-type'
           setValue={setModelType}
           value={modelType}
