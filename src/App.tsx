@@ -4,6 +4,7 @@ import { ClipPlaneTest } from './threed/ClipPlaneTest';
 import { CullingTest } from './threed/CullingTest';
 import { LightModelType } from './threed/lighting/lighting.types';
 import { PerspectiveTest } from './threed/PerspectiveTest';
+import { ShadingTest } from './threed/ShadingTest';
 import TestFrame, {
   ModelType,
   RenderType,
@@ -72,6 +73,8 @@ const App = () => {
         case 'clip-plane':
           frame = new ClipPlaneTest(testFrameParams);
           break;
+        case 'shading':
+          frame = new ShadingTest(testFrameParams);
       }
       frame.addModels();
       const intervalToStop = setInterval(
@@ -127,6 +130,7 @@ const App = () => {
           <option value='translation'>Translation</option>
           <option value='culling'>Culling</option>
           <option value='clip-plane'>Clip Plane</option>
+          <option value='shading'>Shading</option>
         </select>
 
         <select

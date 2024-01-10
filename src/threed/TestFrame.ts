@@ -16,7 +16,12 @@ import World from './world/World';
 
 export type RenderType = 'shaded' | 'wireframe';
 
-export type TestType = 'translation' | 'perspective' | 'culling' | 'clip-plane';
+export type TestType =
+  | 'translation'
+  | 'perspective'
+  | 'culling'
+  | 'clip-plane'
+  | 'shading';
 export type ModelType = 'cube' | 'sphere' | 'cylinder' | 'tube' | 'surface';
 
 export type TestFrameParams = {
