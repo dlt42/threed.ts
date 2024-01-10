@@ -2,7 +2,7 @@ import Matrix from './common/Matrix';
 import { Translation } from './common/Transformation';
 import ModelInstance from './objectinstance/ModelInstance';
 import ModelInstanceGenerator from './objectinstance/ModelInstanceGenerator';
-import TestFrame, { RenderSceneArgs } from './TestFrame';
+import TestFrame from './TestFrame';
 
 export class TranslationTest extends TestFrame {
   private count = 50;
@@ -10,22 +10,22 @@ export class TranslationTest extends TestFrame {
   private add = -1;
 
   public addModels() {
-    if (!this.world) {
-      throw Error('Invalid state');
-    }
+    const { world } = this.threeD;
+
     const model = this.createModel();
+
     const generator: ModelInstanceGenerator = new ModelInstanceGenerator();
     for (let i = 0; i < 3; i++) {
       const instance: ModelInstance = generator.generateInstance(model);
-      this.world.addModel(instance);
-      this.world.transformModel(
-        instance,
-        new Translation({ x: 0, y: 0, z: 1000 })
-      );
+      world.addModel(instance);
+      world.transformModel(instance, new Translation({ x: 0, y: 0, z: 1000 }));
     }
   }
 
-  public renderScene({ objects, rotation, world }: RenderSceneArgs) {
+  public renderScene() {
+    const { world } = this.threeD;
+    const objects = world.objectArray;
+
     if (this.count > 0) {
       objects[0].transformWorld(Matrix.getTranslationMatrix([10, 0, 0]));
       objects[1].transformWorld(Matrix.getTranslationMatrix([0, 10, 0]));
@@ -43,11 +43,12 @@ export class TranslationTest extends TestFrame {
       this.add = 1;
     }
     this.count += this.add;
+
     for (let i = 0; i < 3; i++)
       world.rotateModelAroundPoint(
         objects[i],
         objects[i].getWorldPosition(),
-        rotation
+        this.getRotation()
       );
   }
 }

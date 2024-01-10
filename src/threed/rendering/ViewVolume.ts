@@ -30,6 +30,7 @@ export default class ViewVolume implements ScreenAreaListener {
     const tempVertices: VertexInstance[] = [];
     let newVertices = polygon.vertexArray.slice(0);
     let count: number;
+
     for (const clipPlane of this.clipPlanes) {
       count = 0;
       for (let i = 0; i < newVertices.length; i++) {
@@ -38,6 +39,7 @@ export default class ViewVolume implements ScreenAreaListener {
         const cA = vertexA.viewCoords;
         const cB = vertexB.viewCoords;
         const cP = clipPlane.point;
+
         const dc1 =
           (cA[0] - cP[0]) * clipPlane.normal0 +
           (cA[1] - cP[1]) * clipPlane.normal1 +
@@ -46,6 +48,7 @@ export default class ViewVolume implements ScreenAreaListener {
           (cB[0] - cP[0]) * clipPlane.normal0 +
           (cB[1] - cP[1]) * clipPlane.normal1 +
           (cB[2] - cP[2]) * clipPlane.normal2;
+
         if (dc1 > 0 && dc2 > 0) {
           tempVertices[count] = vertexB;
           count++;
@@ -68,7 +71,7 @@ export default class ViewVolume implements ScreenAreaListener {
           if (!vertA || !vertB) {
             throw Error('?');
           }
-          const xI = vertA && vertB ? vertA[0] + t * (vertB[0] - vertA[0]) : 0;
+          const xI = vertA[0] + t * (vertB[0] - vertA[0]);
           const ci =
             vertexA.colourIndex +
             t * (vertexB.colourIndex - vertexA.colourIndex);
@@ -87,7 +90,10 @@ export default class ViewVolume implements ScreenAreaListener {
           }
         }
       }
-      newVertices = tempVertices.slice(0);
+      newVertices = [];
+      for (let i = 0; i < count; i++) {
+        newVertices[i] = tempVertices[i];
+      }
     }
 
     return newVertices.length >= 3

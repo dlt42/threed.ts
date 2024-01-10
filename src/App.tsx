@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { ClipPlaneTest } from './threed/ClipPlaneTest';
 import { CullingTest } from './threed/CullingTest';
 import { LightModelType } from './threed/lighting/lighting.types';
 import { PerspectiveTest } from './threed/PerspectiveTest';
@@ -10,6 +11,35 @@ import TestFrame, {
   TestType,
 } from './threed/TestFrame';
 import { TranslationTest } from './threed/TranslationTest';
+
+type ConfigSelectProps<T> = {
+  value: keyof T;
+  id: string;
+  setValue: (value: keyof T) => void;
+  values: { label: string; value: keyof T }[];
+};
+
+const ConfigSelect = <T,>({
+  id,
+  value,
+  setValue,
+  values,
+}: ConfigSelectProps<T>) => {
+  return (
+    <select
+      id={id}
+      value={value.toString()}
+      onChange={(e) => setValue(e.target.value as keyof T)}
+      style={{ fontSize: '1rem', padding: '.25rem' }}
+    >
+      {values.map((current, index) => (
+        <option key={`${id}-${index}`} value={current.value.toString()}>
+          {current.label}
+        </option>
+      ))}
+    </select>
+  );
+};
 
 const App = () => {
   const [testType, setTestType] = useState<TestType>('perspective');
@@ -26,9 +56,7 @@ const App = () => {
       if (!canvas) throw Error('Canvas not found');
       const testFrameParams: TestFrameParams = {
         canvas,
-        lightModelType,
-        renderType,
-        modelType,
+        config: { lightModelType, renderType, modelType },
       };
       let frame: TestFrame;
       switch (testType) {
@@ -41,12 +69,18 @@ const App = () => {
         case 'culling':
           frame = new CullingTest(testFrameParams);
           break;
+        case 'clip-plane':
+          frame = new ClipPlaneTest(testFrameParams);
+          break;
       }
-      frame.createScene();
       frame.addModels();
-      const intervalToStop = setInterval(() => {
-        frame.renderScene(frame.prepareRender());
-      }, 10);
+      const intervalToStop = setInterval(
+        () => {
+          frame.prepareRender();
+          frame.renderScene();
+        },
+        testType === 'clip-plane' ? 0 : 10
+      );
       return () => {
         clearInterval(intervalToStop);
       };
@@ -92,7 +126,9 @@ const App = () => {
           <option value='perspective'>Perspective</option>
           <option value='translation'>Translation</option>
           <option value='culling'>Culling</option>
+          <option value='clip-plane'>Clip Plane</option>
         </select>
+
         <select
           id='render-type'
           value={renderType}
@@ -102,32 +138,32 @@ const App = () => {
           <option value='shaded'>Shaded</option>
           <option value='wireframe'>Wireframe</option>
         </select>
+
         {renderType !== 'wireframe' && (
-          <select
+          <ConfigSelect
             id='light-model-type'
+            setValue={setLightModelType}
             value={lightModelType}
-            onChange={(e) =>
-              setLightModelType(e.target.value as LightModelType)
-            }
-            style={{ fontSize: '1rem', padding: '.25rem' }}
-          >
-            <option value='flat'>Flat</option>
-            <option value='normal'>Normal</option>
-            <option value='gouraud'>Gouraud</option>
-          </select>
+            values={[
+              { label: 'Flat', value: 'flat' },
+              { label: 'Normal', value: 'normal' },
+              { label: 'Gouraud', value: 'gouraud' },
+            ]}
+          />
         )}
-        <select
-          id='shape-type'
+
+        <ConfigSelect
+          id='model-type'
+          setValue={setModelType}
           value={modelType}
-          onChange={(e) => setModelType(e.target.value as ModelType)}
-          style={{ fontSize: '1rem', padding: '.25rem' }}
-        >
-          <option value='cube'>Cube</option>
-          <option value='sphere'>Sphere</option>
-          <option value='cylinder'>Cylinder</option>
-          <option value='tube'>Tube</option>
-          <option value='surface'>Surface</option>
-        </select>
+          values={[
+            { label: 'Cube', value: 'cube' },
+            { label: 'Sphere', value: 'sphere' },
+            { label: 'Cylinder', value: 'cylinder' },
+            { label: 'Tube', value: 'tube' },
+            { label: 'Surface', value: 'surface' },
+          ]}
+        />
       </div>
     </div>
   );
