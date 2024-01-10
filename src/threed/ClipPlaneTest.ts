@@ -8,7 +8,7 @@ export class ClipPlaneTest extends TestFrame {
 
   private add = 1;
   public addModels() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
 
     const sphere1 = this.createModel(0.75, Color.BLUE);
     const sphere2 = this.createModel(1.15, Color.YELLOW);
@@ -30,7 +30,7 @@ export class ClipPlaneTest extends TestFrame {
   }
 
   public renderScene() {
-    const { world, viewVolume } = this.threeD;
+    const { world, viewVolume } = this.elements;
 
     viewVolume.setFarPlaneDepth(300 + this.count);
     viewVolume.setNearPlaneDepth(200 + this.count);

@@ -10,7 +10,7 @@ export class TranslationTest extends TestFrame {
   private add = -1;
 
   public addModels() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
 
     const model = this.createModel();
 
@@ -23,7 +23,7 @@ export class TranslationTest extends TestFrame {
   }
 
   public renderScene() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
     const objects = world.objectArray;
 
     if (this.count > 0) {

@@ -4,7 +4,7 @@ import TestFrame from './TestFrame';
 
 export class PerspectiveTest extends TestFrame {
   public addModels() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
 
     const model = this.createModel();
 
@@ -21,7 +21,7 @@ export class PerspectiveTest extends TestFrame {
   }
 
   public renderScene() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
     const objects = world.objectArray;
     for (let i = 0; i < 10; i++) {
       world.rotateModelAroundPoint(

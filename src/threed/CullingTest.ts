@@ -5,7 +5,7 @@ import TestFrame from './TestFrame';
 
 export class CullingTest extends TestFrame {
   public addModels() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
 
     const models: ModelDefinition[] = [];
     const generator = new ModelInstanceGenerator();
@@ -28,7 +28,7 @@ export class CullingTest extends TestFrame {
   }
 
   public renderScene() {
-    const { world } = this.threeD;
+    const { world } = this.elements;
     const objects = world.objectArray;
     for (let i = 0; i < objects.length; i++)
       world.rotateModelAroundPoint(objects[i], [0, 0, 500], this.getRotation());

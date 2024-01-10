@@ -30,7 +30,7 @@ export type TestFrameConfig = {
   modelType: ModelType;
 };
 
-type ThreeD = {
+type Elements = {
   world: World;
   lightModel: LightModel;
   lightSource: LightSource;
@@ -44,7 +44,7 @@ export default abstract class TestFrame {
   private lastX = 0;
   private lastY = 0;
 
-  protected threeD: ThreeD;
+  protected elements: Elements;
   protected config: TestFrameConfig;
 
   private rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
@@ -52,11 +52,11 @@ export default abstract class TestFrame {
   public constructor(params: TestFrameParams) {
     const { config } = params;
     this.config = config;
-    this.threeD = TestFrame.initialise(params);
+    this.elements = TestFrame.initialise(params);
 
     this.lastX = 200;
     this.lastY = 200;
-    this.threeD.screenArea.getCanvas().addEventListener('mousemove', (e) => {
+    this.elements.screenArea.getCanvas().addEventListener('mousemove', (e) => {
       const flags = e.buttons !== undefined ? e.buttons : e.which;
       if ((flags & 1) === 1) {
         this.mouseDragged(e.pageX, e.pageY);
@@ -69,7 +69,7 @@ export default abstract class TestFrame {
   public static initialise({
     canvas,
     config: { lightModelType, renderType },
-  }: TestFrameParams): ThreeD {
+  }: TestFrameParams): Elements {
     const viewPoint = new ViewPoint(
       [0, 0, 0],
       new Rotation({ x: 0, y: 0, z: 0 })
@@ -119,7 +119,7 @@ export default abstract class TestFrame {
   public abstract renderScene(): void;
 
   public prepareRender() {
-    const { world, renderer, viewVolume, screenArea } = this.threeD;
+    const { world, renderer, viewVolume, screenArea } = this.elements;
 
     world.transferObjectsToViewSpace();
     renderer.render(world, viewVolume);
@@ -144,17 +144,13 @@ export default abstract class TestFrame {
       case 'cube':
         return ModelDefinitionGenerator.cube(80 * checkedScale, color);
       case 'sphere':
-        return ModelDefinitionGenerator.sphere(
-          100 * checkedScale,
-          24,
-          Color.GREEN
-        );
+        return ModelDefinitionGenerator.sphere(100 * checkedScale, 24, color);
       case 'cylinder':
         return ModelDefinitionGenerator.cylinder(
           100 * checkedScale,
           250 * checkedScale,
           24,
-          Color.GREEN
+          color
         );
       case 'tube':
         return ModelDefinitionGenerator.tube(
@@ -162,13 +158,10 @@ export default abstract class TestFrame {
           100 * checkedScale,
           100 * checkedScale,
           24,
-          Color.GREEN
+          color
         );
       case 'surface':
-        return ModelDefinitionGenerator.surfaceXY(
-          80 * checkedScale,
-          Color.GREEN
-        );
+        return ModelDefinitionGenerator.surfaceXY(80 * checkedScale, color);
     }
   }
 }
