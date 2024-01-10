@@ -11,8 +11,8 @@ export default class ScreenArea {
     this.canvas = canvas;
 
     const observer = new ResizeObserver(() => {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
+      canvas.width = canvas.clientWidth | 0;
+      canvas.height = canvas.clientHeight | 0;
       this.resized();
     });
     observer.observe(canvas);
@@ -24,14 +24,14 @@ export default class ScreenArea {
 
   public addListener(listener: ScreenAreaListener) {
     this.listeners.push(listener);
-    const { width, height } = this.canvas.getBoundingClientRect();
+    const { width, height } = this.getDimensions();
     listener.notify(
       new ScreenAreaEvent(this, width, height, ScreenAreaEvent.RESIZED)
     );
   }
 
   private clearBuffer() {
-    const { width, height } = this.canvas.getBoundingClientRect();
+    const { width, height } = this.getDimensions();
     if (this.buffer === null) {
       if (width > 0 && height > 0) {
         const arrayBuffer = new ArrayBuffer(width * height * 4);
@@ -69,7 +69,7 @@ export default class ScreenArea {
         ctx.putImageData(this.buffer, 0, 0);
       }
       if (this.saveBuffer === null) {
-        const { width, height } = this.canvas.getBoundingClientRect();
+        const { width, height } = this.getDimensions();
         this.saveBuffer = new ImageData(width, height, {
           colorSpace: 'srgb',
         });
@@ -85,7 +85,7 @@ export default class ScreenArea {
   }
 
   public resized() {
-    const { width, height } = this.canvas.getBoundingClientRect();
+    const { width, height } = this.getDimensions();
     this.buffer = null;
     this.clearBuffer();
     this.listeners.forEach((current) =>
@@ -103,5 +103,10 @@ export default class ScreenArea {
       await new Promise((r) => setTimeout(r, 10));
     }
     return buf;
+  }
+
+  private getDimensions() {
+    const { width, height } = this.canvas.getBoundingClientRect();
+    return { width: width | 0, height: height | 0 };
   }
 }
