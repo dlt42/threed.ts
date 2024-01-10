@@ -28,7 +28,7 @@ const ConfigSelect = <T,>({
         id={id}
         value={value.toString()}
         onChange={(e) => setValue(e.target.value as keyof T)}
-        style={{ fontSize: '.8rem', padding: '.25rem' }}
+        style={{ fontSize: '.8rem', padding: '.2rem' }}
       >
         {values.map((current, index) => (
           <option key={`${id}-${index}`} value={current.value.toString()}>
