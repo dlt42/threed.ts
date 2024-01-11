@@ -1,4 +1,4 @@
-import { Coords, MatrixRow, MatrixValues } from './common.types';
+import { Coords, MatrixValues } from './common.types';
 import { Rotation, Scale, Translation } from './Transformation';
 import TrigTables from './TrigTables';
 
@@ -12,11 +12,10 @@ export default class Matrix {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
-      const values = rotationMatrix.values;
-      values[1][1] = TrigTables.cosValues[angle];
-      values[1][2] = TrigTables.sinValues[angle];
-      values[2][1] = -TrigTables.sinValues[angle];
-      values[2][2] = TrigTables.cosValues[angle];
+      rotationMatrix.values[1][1] = TrigTables.cosValues[angle];
+      rotationMatrix.values[1][2] = TrigTables.sinValues[angle];
+      rotationMatrix.values[2][1] = -TrigTables.sinValues[angle];
+      rotationMatrix.values[2][2] = TrigTables.cosValues[angle];
       rotationArray[angle] = rotationMatrix;
     }
     return rotationArray;
@@ -26,11 +25,10 @@ export default class Matrix {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
-      const values = rotationMatrix.values;
-      values[0][0] = TrigTables.cosValues[angle];
-      values[0][2] = -TrigTables.sinValues[angle];
-      values[2][0] = TrigTables.sinValues[angle];
-      values[2][2] = TrigTables.cosValues[angle];
+      rotationMatrix.values[0][0] = TrigTables.cosValues[angle];
+      rotationMatrix.values[0][2] = -TrigTables.sinValues[angle];
+      rotationMatrix.values[2][0] = TrigTables.sinValues[angle];
+      rotationMatrix.values[2][2] = TrigTables.cosValues[angle];
       rotationArray[angle] = rotationMatrix;
     }
     return rotationArray;
@@ -40,12 +38,10 @@ export default class Matrix {
     const rotationArray: Matrix[] = new Array<Matrix>(3600);
     for (let angle = 0; angle < 3600; angle++) {
       const rotationMatrix: Matrix = new Matrix();
-      const values = rotationMatrix.values;
-      values[0][0] = TrigTables.cosValues[angle];
-      values[0][1] = TrigTables.sinValues[angle];
-      values[1][0] = -TrigTables.sinValues[angle];
-      values[1][1] = TrigTables.cosValues[angle];
-      rotationMatrix.values = values;
+      rotationMatrix.values[0][0] = TrigTables.cosValues[angle];
+      rotationMatrix.values[0][1] = TrigTables.sinValues[angle];
+      rotationMatrix.values[1][0] = -TrigTables.sinValues[angle];
+      rotationMatrix.values[1][1] = TrigTables.cosValues[angle];
       rotationArray[angle] = rotationMatrix;
     }
     return rotationArray;
@@ -88,90 +84,73 @@ export default class Matrix {
 
   public static getScaleMatrix({ transformation }: Scale) {
     const scaleMatrix: Matrix = new Matrix();
-    const values = scaleMatrix.values;
-    values[0][0] = transformation.x;
-    values[1][1] = transformation.y;
-    values[2][2] = transformation.z;
-    scaleMatrix.values = values;
+    scaleMatrix.values[0][0] = transformation.x;
+    scaleMatrix.values[1][1] = transformation.y;
+    scaleMatrix.values[2][2] = transformation.z;
     return scaleMatrix;
   }
 
   public static getTranslationMatrix(coordinates: Coords) {
     const translationMatrix: Matrix = new Matrix();
-    const values = translationMatrix.values;
-    values[3][0] = coordinates[0];
-    values[3][1] = coordinates[1];
-    values[3][2] = coordinates[2];
-    translationMatrix.values = values;
+    translationMatrix.values[3] = [
+      coordinates[0],
+      coordinates[1],
+      coordinates[2],
+      translationMatrix.values[3][3],
+    ];
     return translationMatrix;
   }
 
   public static getTranslationMatrixForValues(x: number, y: number, z: number) {
     const translationMatrix: Matrix = new Matrix();
-    const values = translationMatrix.values;
-    values[3][0] = x;
-    values[3][1] = y;
-    values[3][2] = z;
-    translationMatrix.values = values;
+    translationMatrix.values[3] = [x, y, z, translationMatrix.values[3][3]];
     return translationMatrix;
   }
 
   public static getRotateModelAroundPoint(point: Coords, rotation: Rotation) {
-    const translateToOrigin: Matrix = Matrix.getTranslationMatrixForValues(
-      -point[0],
-      -point[1],
-      -point[2]
+    return Matrix.multiplyMatrices(
+      Matrix.multiplyMatrices(
+        Matrix.getTranslationMatrixForValues(-point[0], -point[1], -point[2]),
+        Matrix.getRotationMatrix(rotation)
+      ),
+      Matrix.getTranslationMatrix(point)
     );
-    const rotate: Matrix = Matrix.getRotationMatrix(rotation);
-    const translateToPosition: Matrix = Matrix.getTranslationMatrix(point);
-    const transformMatrix: Matrix = Matrix.multiplyMatrices(
-      translateToOrigin,
-      rotate
-    );
-    return Matrix.multiplyMatrices(transformMatrix, translateToPosition);
   }
 
   public static getTranslationMatrixForTranslation({
     transformation,
   }: Translation) {
     const translationMatrix: Matrix = new Matrix();
-    const values = translationMatrix.values;
-    values[3][0] = transformation.x;
-    values[3][1] = transformation.y;
-    values[3][2] = transformation.z;
-    translationMatrix.values = values;
+    translationMatrix.values[3] = [
+      transformation.x,
+      transformation.y,
+      transformation.z,
+      translationMatrix.values[3][3],
+    ];
     return translationMatrix;
   }
 
   public static multiplyMatrices(matA: Matrix, matB: Matrix) {
     const matrixNew = new Matrix();
-    const valuesNew2 = matrixNew.values;
-    for (let ii = 0; ii < 4; ii++) {
-      for (let ij = 0; ij < 4; ij++) {
-        valuesNew2[ii][ij] =
+    for (let ii = 0; ii < 4; ii++)
+      for (let ij = 0; ij < 4; ij++)
+        matrixNew.values[ii][ij] =
           matA.values[ii][0] * matB.values[0][ij] +
           matA.values[ii][1] * matB.values[1][ij] +
           matA.values[ii][2] * matB.values[2][ij] +
           matA.values[ii][3] * matB.values[3][ij];
-      }
-    }
-    matrixNew.values = valuesNew2;
     return matrixNew;
   }
 
   public static multiplyValues(values: MatrixValues, mat: Matrix) {
     const matrixNew: Matrix = new Matrix();
-    const valuesNew = matrixNew.values;
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        valuesNew[i][j] =
+    for (let i = 0; i < 4; i++)
+      for (let j = 0; j < 4; j++)
+        matrixNew.values[i][j] =
           values[i][0] * mat.values[0][j] +
           values[i][1] * mat.values[1][j] +
           values[i][2] * mat.values[2][j] +
           values[i][3] * mat.values[3][j];
-      }
-    }
-    matrixNew.values = valuesNew;
     return matrixNew;
   }
 
@@ -187,36 +166,21 @@ export default class Matrix {
   }
 
   public transform(srcCoords: Coords, destCoords: Coords) {
-    const valuesOriginal: MatrixRow = [
-      srcCoords[0],
-      srcCoords[1],
-      srcCoords[2],
-      1,
-    ];
-    const valuesNew = [];
-    for (let i = 0; i < 4; i++) {
-      valuesNew[i] =
-        valuesOriginal[0] * this.values[0][i] +
-        valuesOriginal[1] * this.values[1][i] +
-        valuesOriginal[2] * this.values[2][i] +
-        valuesOriginal[3] * this.values[3][i];
-    }
-    destCoords[0] = valuesNew[0];
-    destCoords[1] = valuesNew[1];
-    destCoords[2] = valuesNew[2];
+    for (let i = 0; i < 3; i++)
+      destCoords[i] =
+        srcCoords[0] * this.values[0][i] +
+        srcCoords[1] * this.values[1][i] +
+        srcCoords[2] * this.values[2][i] +
+        this.values[3][i];
   }
 
   public transformCoords(coords: Coords) {
-    const valuesNew: MatrixRow = [0, 0, 0, 0];
-    for (let i = 0; i < 4; i++) {
-      valuesNew[i] =
-        coords[0] * this.values[0][i] +
-        coords[1] * this.values[1][i] +
-        coords[2] * this.values[2][i] +
+    const orig = coords.slice(0);
+    for (let i = 0; i < 3; i++)
+      coords[i] =
+        (orig[0] * 100.0 * this.values[0][i]) / 100.0 +
+        (orig[1] * 100.0 * this.values[1][i]) / 100.0 +
+        (orig[2] * 100.0 * this.values[2][i]) / 100.0 +
         this.values[3][i];
-    }
-    coords[0] = valuesNew[0];
-    coords[1] = valuesNew[1];
-    coords[2] = valuesNew[2];
   }
 }

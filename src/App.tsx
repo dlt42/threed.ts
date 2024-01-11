@@ -4,6 +4,7 @@ import ConfigSelect from './ConfigSelect';
 import { ClipPlaneTest } from './threed/ClipPlaneTest';
 import { CullingTest } from './threed/CullingTest';
 import { LightModelType } from './threed/lighting/lighting.types';
+import { LightSourceTest } from './threed/LightSourceTest';
 import { PerspectiveTest } from './threed/PerspectiveTest';
 import { ShadingTest } from './threed/ShadingTest';
 import TestFrame, {
@@ -47,6 +48,10 @@ const App = () => {
           break;
         case 'shading':
           frame = new ShadingTest(testFrameParams);
+          break;
+        case 'light-source':
+          frame = new LightSourceTest(testFrameParams);
+          break;
       }
       frame.addModels();
       const intervalToStop = setInterval(
@@ -54,7 +59,7 @@ const App = () => {
           frame.prepareRender();
           frame.renderScene();
         },
-        testType === 'clip-plane' ? 0 : 10
+        testType === 'clip-plane' ? 0 : 0
       );
       return () => {
         clearInterval(intervalToStop);
@@ -110,11 +115,12 @@ const App = () => {
           setValue={setTestType}
           value={testType}
           values={[
-            { label: 'Shaded', value: 'perspective' },
+            { label: 'Perspective', value: 'perspective' },
             { label: 'Translation', value: 'translation' },
             { label: 'Culling', value: 'culling' },
             { label: 'Clip Plane', value: 'clip-plane' },
             { label: 'Shading', value: 'shading' },
+            { label: 'Light Source', value: 'light-source' },
           ]}
         />
 

@@ -21,7 +21,9 @@ export type TestType =
   | 'perspective'
   | 'culling'
   | 'clip-plane'
-  | 'shading';
+  | 'shading'
+  | 'light-source';
+
 export type ModelType = 'cube' | 'sphere' | 'cylinder' | 'tube' | 'surface';
 
 export type TestFrameParams = {
@@ -46,13 +48,13 @@ type Elements = {
 };
 
 export default abstract class TestFrame {
-  private lastX = 0;
-  private lastY = 0;
+  protected lastX = 0;
+  protected lastY = 0;
 
   protected elements: Elements;
   protected config: TestFrameConfig;
 
-  private rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
+  protected rotation: Rotation = new Rotation({ x: 0, y: 0, z: 0 });
 
   public constructor(params: TestFrameParams) {
     const { config } = params;

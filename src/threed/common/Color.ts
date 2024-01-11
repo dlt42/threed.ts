@@ -10,6 +10,7 @@ export default class Color {
   public static BLACK: Color = new Color([0, 0, 0, 255]);
   public static WHITE: Color = new Color([255, 255, 255, 255]);
   public static GRAY: Color = new Color([127, 127, 127, 255]);
+  public static MAGENTA: Color = new Color([255, 0, 255, 255]);
 
   constructor(rgba: RGBA) {
     this.rgba = rgba;
