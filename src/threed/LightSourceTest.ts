@@ -40,7 +40,7 @@ export class LightSourceTest extends TestFrame {
   }
 
   public renderScene() {
-    const { world } = this.elements;
+    const { world, lightSource } = this.elements;
     const objects = world.objectArray;
 
     if (this.count++ == 100) {
@@ -56,6 +56,8 @@ export class LightSourceTest extends TestFrame {
       objects[0].getWorldPosition(),
       this.getRotation()
     );
+    lightSource.setPosition(objects[0].getWorldPosition());
+    objects[0].setIntensityToFull();
     objects[1].transformWorld(transformMatrix);
     objects[2].transformWorld(transformMatrix);
     objects[2].transformWorld(transformMatrix);
